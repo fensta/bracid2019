@@ -41,7 +41,7 @@ class TestCreateLookupMatrix(TestCase):
                     {
                         'high': 3,
                         'low': 3,
-                        'Conditional':
+                        CONDITIONAL:
                             {
                                 'high':
                                     Counter({
@@ -75,7 +75,7 @@ class TestCreateLookupMatrix(TestCase):
             {0: {
                 'high': 3,
                 'low': 3,
-                'Conditional':
+                CONDITIONAL:
                     {
                         'high':
                             Counter({
@@ -92,7 +92,7 @@ class TestCreateLookupMatrix(TestCase):
                  'A': 4,
                  'B': 1,
                  'C': 1,
-                 'Conditional':
+                 CONDITIONAL:
                      {
                          'A':
                              Counter({
