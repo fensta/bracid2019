@@ -12,6 +12,10 @@ class TestReadDataset(TestCase):
             os.path.abspath(__file__)), os.pardir))
         src = os.path.join(base_dir, "datasets", "iris_test.csv")
         dataset, lookup = read_dataset(src)
+        correct_column_names = ["sepal length in cm", "sepal width in cm", "petal length in cm", "petal width in cm",
+                                "class"]
+        print(dataset.columns)
+        self.assertTrue(dataset.columns.tolist() == correct_column_names)
         self.assertTrue(dataset.shape == (12, 5))
         self.assertTrue(lookup == {})
 
@@ -20,7 +24,9 @@ class TestReadDataset(TestCase):
         base_dir = os.path.abspath(os.path.join(os.path.dirname(
             os.path.abspath(__file__)), os.pardir))
         src = os.path.join(base_dir, "datasets", "nominal_test.csv")
-        dataset, lookup = read_dataset(src)
+        # Automatically name the columns
+        dataset, lookup = read_dataset(src, header=False)
+        print(dataset)
         correct = \
             {0: {
                      'd': 2,
@@ -67,5 +73,6 @@ class TestReadDataset(TestCase):
                     }
                 }
              }
+        self.assertTrue(dataset.columns.tolist() == [0, 1, 2, 3, 4])
         self.assertTrue(dataset.shape == (4, 5))
         self.assertTrue(lookup == correct)
