@@ -19,7 +19,7 @@ class TestCreateLookupMatrix(TestCase):
         for i, _ in enumerate(df):
             col = df.iloc[:, i]
             if not is_numeric_dtype(col):
-                lookup[i] = create_svdm_lookup_column(df, col, -1)
+                lookup[i] = create_svdm_lookup_column(df, col, "")
         self.assertTrue(lookup == dict())
 
     def test_lookup_single_feature(self):
@@ -29,15 +29,15 @@ class TestCreateLookupMatrix(TestCase):
         df = pd.DataFrame({"A": ["high", "low", "high", "low", "low", "high"], "B": [3, 2, 1, 1, 1, 2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
         lookup = {}
-        class_idx = 2
-        for i, _ in enumerate(df):
-            if i != class_idx:
-                col = df.iloc[:, i]
+        class_col_name = "Class"
+        for col_name in df:
+            if col_name != class_col_name:
+                col = df[col_name]
                 if not is_numeric_dtype(col):
-                    lookup[i] = create_svdm_lookup_column(df, col, class_idx)
+                    lookup[col_name] = create_svdm_lookup_column(df, col, class_col_name)
         correct =\
             {
-                0:
+                "A":
                     {
                         'high': 3,
                         'low': 3,
@@ -65,14 +65,14 @@ class TestCreateLookupMatrix(TestCase):
         df = pd.DataFrame({"A": ["high", "low", "high", "low", "low", "high"], "B": ["A", "A", "B", "C", "A", "A"],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
         lookup = {}
-        class_idx = 2
-        for i, _ in enumerate(df):
-            if i != class_idx:
-                col = df.iloc[:, i]
+        class_col_name = "Class"
+        for col_name in df:
+            if col_name != class_col_name:
+                col = df[col_name]
                 if not is_numeric_dtype(col):
-                    lookup[i] = create_svdm_lookup_column(df, col, class_idx)
+                    lookup[col_name] = create_svdm_lookup_column(df, col, class_col_name)
         correct = \
-            {0: {
+            {"A": {
                 'high': 3,
                 'low': 3,
                 CONDITIONAL:
@@ -88,7 +88,7 @@ class TestCreateLookupMatrix(TestCase):
                                 'apple': 1
                             })
                     }},
-             1: {
+             "B": {
                  'A': 4,
                  'B': 1,
                  'C': 1,

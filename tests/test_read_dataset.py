@@ -14,7 +14,6 @@ class TestReadDataset(TestCase):
         dataset, lookup = read_dataset(src)
         correct_column_names = ["sepal length in cm", "sepal width in cm", "petal length in cm", "petal width in cm",
                                 "class"]
-        print(dataset.columns)
         self.assertTrue(dataset.columns.tolist() == correct_column_names)
         self.assertTrue(dataset.shape == (12, 5))
         self.assertTrue(lookup == {})
