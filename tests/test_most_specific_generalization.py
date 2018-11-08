@@ -18,7 +18,7 @@ class TestMostSpecificGeneralization(TestCase):
             nearest_example = dataset.iloc[[i]]
             print("example", type(nearest_example), nearest_example, type(nearest_example["A"]), nearest_example["A"])
             rule = rules[i]
-            rule = most_specific_generalization(rules, nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_drop_nominal(self):
@@ -30,7 +30,7 @@ class TestMostSpecificGeneralization(TestCase):
         for i, _ in dataset.iterrows():
             nearest_example = dataset.iloc[[i]]
             rule = rules[i]
-            rule = most_specific_generalization(rules, nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_change_lower(self):
@@ -43,7 +43,7 @@ class TestMostSpecificGeneralization(TestCase):
         for i, _ in dataset.iterrows():
             nearest_example = dataset.iloc[[i]]
             rule = rules[i]
-            rule = most_specific_generalization(rules, nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_change_upper(self):
@@ -56,7 +56,7 @@ class TestMostSpecificGeneralization(TestCase):
         for i, _ in dataset.iterrows():
             nearest_example = dataset.iloc[[i]]
             rule = rules[i]
-            rule = most_specific_generalization(rules, nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_change_multiple(self):
@@ -70,7 +70,7 @@ class TestMostSpecificGeneralization(TestCase):
         for i, _ in dataset.iterrows():
             nearest_example = dataset.iloc[[i]]
             rule = rules[i]
-            rule = most_specific_generalization(rules, nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_multiple_rules(self):
@@ -87,5 +87,5 @@ class TestMostSpecificGeneralization(TestCase):
         for i, _ in dataset.iterrows():
             nearest_example = dataset.iloc[[i]]
             rule = rules[i]
-            updated_rule = most_specific_generalization(rules, nearest_example, rule, class_col_name, i)
+            updated_rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(updated_rule.equals(correct[i]))
