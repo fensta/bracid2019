@@ -186,3 +186,64 @@ class TestSvdm(TestCase):
             if is_string_dtype(col):
                 dists.append(svdm(col, rule, i, lookup, classes))
             self.assertTrue(dists[i].equals(correct[i]))
+
+    def test_svdm_multiple_features_multiple_rules(self):
+        """Tests that correct svdm is computed for 2 nominal features with 2 rules"""
+        df = pd.DataFrame({"A": ["high", "low", "high", "low", "low", "high"], "B": ["x", "y", "x", "x", "y", "x"],
+                           "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
+        class_col_name = "Class"
+        lookup = \
+            {
+                "A":
+                    {
+                        'high': 3,
+                        'low': 3,
+                        CONDITIONAL:
+                            {
+                                'high':
+                                    Counter({
+                                        'banana': 2,
+                                        'apple': 1
+                                    }),
+                                'low':
+                                    Counter({
+                                        'banana': 2,
+                                        'apple': 1
+                                    })
+                            }
+                    },
+                "B":
+                    {
+                        'x': 4,
+                        'y': 2,
+                        CONDITIONAL:
+                            {
+                                'x':
+                                    Counter({
+                                        'banana': 3,
+                                        'apple': 1
+                                    }),
+                                'y':
+                                    Counter({
+                                        'banana': 1,
+                                        'apple': 1
+                                    })
+                            }
+                    }
+            }
+        correct = [pd.Series({2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0}),
+                   pd.Series({2: 0.0, 3: 0.0, 4: 0.5, 5: 0.0})]
+        rules = [pd.Series({"A": "high", "B": "x", "Class": "banana"}),
+                pd.Series({"A": "high", "B": "x", "Class": "banana"})]
+        dists = []
+        classes = ["apple", "banana"]
+        # Only keep rows with the same class label as the rule
+        df = df.loc[df[class_col_name] == "banana"]
+        for rule in rules:
+            for i, col_name in enumerate(df):
+                if col_name == class_col_name:
+                    continue
+                col = df[col_name]
+                if is_string_dtype(col):
+                    dists.append(svdm(col, rule, i, lookup, classes))
+                self.assertTrue(dists[i].equals(correct[i]))
