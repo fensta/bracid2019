@@ -45,8 +45,7 @@ class TestSvdm(TestCase):
                 continue
             col = df[col_name]
             if is_string_dtype(col):
-                dist += svdm(col, rule, i, lookup, classes)
-        print("dist=", dist)
+                dist += svdm(col, rule, lookup, classes)
         self.assertTrue(dist == 1)
 
     def test_svdm_single_feature(self):
@@ -85,7 +84,7 @@ class TestSvdm(TestCase):
                 continue
             col = df[col_name]
             if is_string_dtype(col):
-                dist = svdm(col, rule, i, lookup, classes)
+                dist = svdm(col, rule, lookup, classes)
         self.assertTrue(dist.equals(correct))
 
     def test_svdm_single_feature2(self):
@@ -125,7 +124,7 @@ class TestSvdm(TestCase):
                 continue
             col = df[col_name]
             if is_string_dtype(col):
-                dist = svdm(col, rule, i, lookup, classes)
+                dist = svdm(col, rule, lookup, classes)
         self.assertTrue(dist.equals(correct))#
 
     def test_svdm_multiple_features(self):
@@ -184,7 +183,7 @@ class TestSvdm(TestCase):
                 continue
             col = df[col_name]
             if is_string_dtype(col):
-                dists.append(svdm(col, rule, i, lookup, classes))
+                dists.append(svdm(col, rule, lookup, classes))
             self.assertTrue(dists[i].equals(correct[i]))
 
     def test_svdm_multiple_features_multiple_rules(self):
@@ -245,5 +244,5 @@ class TestSvdm(TestCase):
                     continue
                 col = df[col_name]
                 if is_string_dtype(col):
-                    dists.append(svdm(col, rule, i, lookup, classes))
+                    dists.append(svdm(col, rule, lookup, classes))
                 self.assertTrue(dists[i].equals(correct[i]))
