@@ -172,7 +172,7 @@ class TestSvdm(TestCase):
                     }
             }
         correct = [pd.Series({2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0}),
-                   pd.Series({2: 0.0, 3: 0.0, 4: 0.5, 5: 0.0})]
+                   pd.Series({2: 0.0, 3: 0.0, 4: 0.25, 5: 0.0})]
         rule = pd.Series({"A": "high", "B": "x", "Class": "banana"})
         dists = []
         classes = ["apple", "banana"]
@@ -231,7 +231,7 @@ class TestSvdm(TestCase):
                     }
             }
         correct = [pd.Series({2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0}),
-                   pd.Series({2: 0.0, 3: 0.0, 4: 0.5, 5: 0.0})]
+                   pd.Series({2: 0.0, 3: 0.0, 4: 0.25, 5: 0.0})]
         rules = [pd.Series({"A": "high", "B": "x", "Class": "banana"}),
                 pd.Series({"A": "high", "B": "x", "Class": "banana"})]
         dists = []
