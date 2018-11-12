@@ -125,7 +125,7 @@ class TestSvdm(TestCase):
             col = df[col_name]
             if is_string_dtype(col):
                 dist = svdm(col, rule, lookup, classes)
-        self.assertTrue(dist.equals(correct))#
+        self.assertTrue(dist.equals(correct))
 
     def test_svdm_multiple_features(self):
         """Tests that correct svdm is computed for 2 nominal features"""
