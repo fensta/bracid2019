@@ -10,8 +10,8 @@ from scripts.utils import hvdm, CONDITIONAL
 class TestHvdm(TestCase):
     """Test hvdm() in utils.py"""
 
-    def test_hvdm_multiple_numeric(self):
-        """Tests what happens if input has multiple numeric features"""
+    def test_hvdm_numeric_nominal(self):
+        """Tests what happens if input has a numeric and a nominal feature"""
         df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
                            "C": [3, 2, 1, .5, 3, 2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
@@ -46,3 +46,4 @@ class TestHvdm(TestCase):
         # Due to floating point precision, use approximate comparison
         self.assertTrue(np.allclose(correct["A"], dist["A"]) and np.allclose(correct["B"], dist["B"]) and
                         np.allclose(correct["dist"], dist["dist"]))
+
