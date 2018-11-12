@@ -10,21 +10,41 @@ from scripts.utils import di
 class TestDi(TestCase):
     """Test di() in utils.py"""
 
-    def test_di_nan(self):
-        """Tests that correct distance is computed if NaNs occur"""
-        df = pd.DataFrame({"A": ["high", np.nan, "high", "low", "low", "high"], "B": [3, 2, 1, np.nan, 1, 2],
+    def test_di_nan_row(self):
+        """Tests that correct distance is computed if NaNs occur in a row of a column"""
+        df = pd.DataFrame({"A": ["high", np.nan, "high", "low", "low", "high"], "B": [3, 2, 1, np.nan, 0.5, 2],
+                           "C": [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
         class_col_name = "Class"
-        rule = pd.Series({"A": "high", "B": (1, 2), "Class": "banana"})
-        dist = 0
-        min_max = pd.DataFrame({"B": {"min": 1, "max": 2}})
+        rule = pd.Series({"A": "high", "B": (1, 2), "C":(1, np.NaN), "Class": "banana"})
+        min_max = pd.DataFrame({"B": {"min": 1, "max": 5}})
+        correct = [pd.Series([1/4*1/4, 0.0, 0.0, 1.0, 1/8*1/8, 0.0], name="A"),
+                   pd.Series([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], name="A")]
+        j = 0
         for i, col_name in enumerate(df):
             if col_name == class_col_name:
                 continue
             col = df[col_name]
             if is_numeric_dtype(col):
-                dist += di(col, rule, min_max)
-        self.assertTrue(dist == 1)
+                dist = di(col, rule, min_max)
+                self.assertTrue(dist.equals(correct[j]))
+                j += 1
+
+    def test_di_nan_rule(self):
+        """Tests that correct distance is computed if NaNs occur in a rule"""
+        df = pd.DataFrame({"A": ["high", np.nan, "high", "low", "low", "high"], "B": [3, 2, 1, np.nan, 1, 2],
+                           "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
+        class_col_name = "Class"
+        rule = pd.Series({"A": "high", "B": (np.NaN, 2), "Class": "banana"})
+        min_max = pd.DataFrame({"B": {"min": 1, "max": 2}})
+        correct = pd.Series([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], name="A")
+        for i, col_name in enumerate(df):
+            if col_name == class_col_name:
+                continue
+            col = df[col_name]
+            if is_numeric_dtype(col):
+                dist = di(col, rule, min_max)
+                self.assertTrue(dist.equals(correct))
 
     def test_di_single_feature(self):
         """Tests that correct distance is computed for 1 numeric feature"""

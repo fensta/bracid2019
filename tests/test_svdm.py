@@ -55,7 +55,7 @@ class TestSvdm(TestCase):
                 j += 1
 
     def test_svdm_nan_rule(self):
-        """Tests that correct svdm is computed if NaNs occur in rule"""
+        """Tests that correct svdm is computed if NaNs occur in a rule"""
         df = pd.DataFrame({"A": ["high", np.nan, "high", "low", "low", "high"], "B": [3, 2, 1, 1, 1, 2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
         class_col_name = "Class"
