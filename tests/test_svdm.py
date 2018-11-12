@@ -11,8 +11,51 @@ from scripts.utils import svdm, CONDITIONAL
 class TestSvdm(TestCase):
     """Tests svdm() from utils.py"""
 
-    def test_svdm_nan(self):
-        """Tests that correct svdm is computed if NaNs occur"""
+    def test_svdm_nan_row(self):
+        """Tests that correct svdm is computed if NaNs occur in a row of a column"""
+        df = pd.DataFrame({"A": ["high", np.nan, "high", "low", "low", "high"], "B": [3, 2, 1, 1, 1, 2],
+                           "C": [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                           "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
+        class_col_name = "Class"
+        lookup = \
+            {
+                "A":
+                    {
+                        'high': 3,
+                        'low': 2,
+                        CONDITIONAL:
+                            {
+                                'high':
+                                    Counter({
+                                        'banana': 2,
+                                        'apple': 1
+                                    }),
+                                'low':
+                                    Counter({
+                                        'banana': 2
+                                    })
+                            }
+                    }
+            }
+        rule = pd.Series({"A": "high", "B": (1, 1), "C": "bla", "Class": "banana"})
+        classes = ["apple", "banana"]
+        correct = [pd.Series([0.0, 1.0, 0.0, 2/3*2/3, 2/3*2/3, 0.0], name="A"),
+                   pd.Series([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], name="A")]
+        j = 0
+        for i, col_name in enumerate(df):
+            if col_name == class_col_name:
+                continue
+            col = df[col_name]
+            if is_string_dtype(col):
+                dist = svdm(col, rule, lookup, classes)
+                if j == 0:
+                    self.assertTrue(np.allclose(correct[0], dist))
+                else:
+                    self.assertTrue(dist.equals(correct[j]))
+                j += 1
+
+    def test_svdm_nan_rule(self):
+        """Tests that correct svdm is computed if NaNs occur in rule"""
         df = pd.DataFrame({"A": ["high", np.nan, "high", "low", "low", "high"], "B": [3, 2, 1, 1, 1, 2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
         class_col_name = "Class"
@@ -37,16 +80,16 @@ class TestSvdm(TestCase):
                             }
                     }
             }
-        rule = pd.Series({"A": "high", "B": (1, 1), "Class": "banana"})
-        dist = 0
+        rule = pd.Series({"A": np.NaN, "B": (1, 1), "Class": "banana"})
         classes = ["apple", "banana"]
+        correct = pd.Series([1.0, 1.0, 1.0, 1.0, 1.0, 1.0], name="A")
         for i, col_name in enumerate(df):
             if col_name == class_col_name:
                 continue
             col = df[col_name]
             if is_string_dtype(col):
-                dist += svdm(col, rule, lookup, classes)
-        self.assertTrue(dist == 1)
+                dist = svdm(col, rule, lookup, classes)
+                self.assertTrue(dist.equals(correct))
 
     def test_svdm_single_feature(self):
         """Tests that correct svdm is computed for 1 nominal feature"""
