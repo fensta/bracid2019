@@ -3,7 +3,7 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.utils import add_tags, CONDITIONAL, TAG, BORDERLINE, SAFE, NOISY
+from scripts.utils import add_tags, CONDITIONAL, TAG, BORDERLINE, SAFE
 
 
 class TestAddTags(TestCase):
@@ -41,10 +41,7 @@ class TestAddTags(TestCase):
                                 })
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"C": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
-        print("examples:\n{}".format(df))
         k = 3
         tagged = add_tags(df, k, class_col_name, lookup, min_max, classes)
-        print(tagged)
-        print("correct:\n{}".format(correct))
         # Due to floating point precision, use approximate comparison
         self.assertTrue(tagged.equals(correct))
