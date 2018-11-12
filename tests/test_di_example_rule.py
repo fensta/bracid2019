@@ -1,15 +1,14 @@
 from unittest import TestCase
-from collections import Counter
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import numpy as np
 
-from scripts.utils import di, CONDITIONAL
+from scripts.utils import di_example_rule
 
 
 class TestDi(TestCase):
-    """Test di() in utils.py"""
+    """Test di_example_rule() in utils.py"""
 
     def test_di_nan(self):
         """Tests that correct distance is computed if NaNs occur"""
@@ -25,7 +24,7 @@ class TestDi(TestCase):
                 continue
             col = df[col_name]
             if is_numeric_dtype(col):
-                dist += di(col, rule, min_max)
+                dist += di_example_rule(col, rule, min_max)
         self.assertTrue(dist == 1)
 
     def test_di_single_feature(self):
@@ -42,7 +41,7 @@ class TestDi(TestCase):
                 continue
             col = df[col_name]
             if is_numeric_dtype(col):
-                dist = di(col, rule, min_max)
+                dist = di_example_rule(col, rule, min_max)
         self.assertTrue(dist.equals(correct))
 
     def test_di_multiple_features(self):
@@ -62,7 +61,7 @@ class TestDi(TestCase):
                 continue
             col = df[col_name]
             if is_numeric_dtype(col):
-                dist = di(col, rule, min_max)
+                dist = di_example_rule(col, rule, min_max)
                 dists.append(dist)
                 self.assertTrue(dists[i].equals(correct[i]))
 
@@ -88,6 +87,6 @@ class TestDi(TestCase):
                     continue
                 col = df[col_name]
                 if is_numeric_dtype(col):
-                    dist = di(col, rule, min_max)
+                    dist = di_example_rule(col, rule, min_max)
                     dists.append(dist)
                     self.assertTrue(dists[i].equals(correct[i]))
