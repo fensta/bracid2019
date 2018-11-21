@@ -1,7 +1,8 @@
 from unittest import TestCase
 from collections import Counter
 
-from scripts.utils import assign_tag, SAFE, NOISY, BORDERLINE
+from scripts.vars import SAFE, NOISY, BORDERLINE
+from scripts.utils import assign_tag
 
 
 class TestAssignTag(TestCase):

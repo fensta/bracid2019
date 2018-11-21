@@ -5,7 +5,8 @@ import pandas as pd
 from pandas.api.types import is_string_dtype
 import numpy as np
 
-from scripts.utils import svdm, CONDITIONAL
+from scripts.vars import CONDITIONAL
+from scripts.utils import svdm
 
 
 class TestSvdm(TestCase):

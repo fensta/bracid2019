@@ -4,7 +4,8 @@ from collections import Counter
 import pandas as pd
 import numpy as np
 
-from scripts.utils import add_tags, CONDITIONAL, TAG, BORDERLINE, SAFE, NOISY
+from scripts.vars import CONDITIONAL, TAG, BORDERLINE, SAFE, NOISY
+from scripts.utils import add_tags
 
 
 class TestAddTags(TestCase):

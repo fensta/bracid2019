@@ -4,7 +4,8 @@ from collections import Counter
 import pandas as pd
 import numpy as np
 
-from scripts.utils import hvdm, CONDITIONAL
+from scripts.vars import CONDITIONAL
+from scripts.utils import hvdm
 
 
 class TestHvdm(TestCase):

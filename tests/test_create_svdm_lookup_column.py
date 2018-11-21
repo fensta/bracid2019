@@ -4,7 +4,8 @@ from collections import Counter
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 
-from scripts.utils import create_svdm_lookup_column, CONDITIONAL
+from scripts.vars import CONDITIONAL
+from scripts.utils import create_svdm_lookup_column
 
 
 class TestCreateLookupMatrix(TestCase):
