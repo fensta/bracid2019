@@ -17,7 +17,26 @@ class TestFindNeighbors(TestCase):
         k = 3
         class_col_name = "Class"
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}, "C": {"min": 1, "max": 2}})
-        self.assertWarns(UserWarning, find_nearest_examples, dataset, k, rule, class_col_name, None, min_max, None)
+        lookup = \
+            {
+                "D":
+                    {
+                        'x': 1,
+                        'y': 1,
+                        CONDITIONAL:
+                            {
+                                'x':
+                                    Counter({
+                                        'A': 1
+                                    }),
+                                'y':
+                                    Counter({
+                                        'B': 1
+                                    })
+                            }
+                    }
+            }
+        self.assertWarns(UserWarning, find_nearest_examples, dataset, k, rule, class_col_name, lookup, min_max, None)
 
     def test_find_neighbors_numeric_nominal(self):
         """Tests what happens if input has a numeric and a nominal feature"""
