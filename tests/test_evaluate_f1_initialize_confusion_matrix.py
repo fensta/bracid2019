@@ -3,8 +3,8 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.utils import evaluate_f1_initialize_confusion_matrix, extract_initial_rules, add_tags_and_extract_rules
-from scripts.vars import CONDITIONAL, seed_mapping
+from scripts.utils import evaluate_f1_initialize_confusion_matrix, add_tags_and_extract_rules
+import scripts.vars as my_vars
 
 
 class TestEvaluateF1InitializeConfusionMatrix(TestCase):
@@ -20,7 +20,7 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
                     {
                         'high': 2,
                         'low': 4,
-                        CONDITIONAL:
+                        my_vars.CONDITIONAL:
                             {
                                 'high':
                                     Counter({
@@ -35,21 +35,23 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
                     }
             }
         classes = ["apple", "banana"]
+        rules = [
+            pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
+            pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
+            pd.Series({"A": "high", "B": (4, 4), "C": (1, 1), "Class": "banana"}, name=2),
+            pd.Series({"A": "low", "B": (1.5, 1.5), "C": (0.5, 0.5), "Class": "banana"}, name=3),
+            pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
+            pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
+        ]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-
         tagged, initial_rules = add_tags_and_extract_rules(df, 2, class_col_name, lookup, min_max, classes)
         print("init rules")
         print(initial_rules)
-        for r in initial_rules:
-            print("rule:\n{}".format(r))
         print("dataset")
         print(df)
-        seed_mapping(zip(df.row))
         # for _, e in extracted.iterrows():
         #     print(e)
         #     print(e.name)
-        rules = [pd.Series({"A": "high", "B": (1, 1), "Class": "banana"}, name=0),
-                 pd.Series({"A": "high", "B": (1, 1), "Class": "banana"}, name=1)]
-
-        evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
+        print(my_vars.seed_mapping)
+        evaluate_f1_initialize_confusion_matrix(df, initial_rules, class_col_name, lookup, min_max, classes)
         self.fail()

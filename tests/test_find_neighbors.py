@@ -3,7 +3,7 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.vars import CONDITIONAL
+import scripts.vars as my_vars
 from scripts.utils import find_nearest_examples
 
 
@@ -23,7 +23,7 @@ class TestFindNeighbors(TestCase):
                     {
                         'x': 1,
                         'y': 1,
-                        CONDITIONAL:
+                        my_vars.CONDITIONAL:
                             {
                                 'x':
                                     Counter({
@@ -50,7 +50,7 @@ class TestFindNeighbors(TestCase):
                     {
                         'high': 2,
                         'low': 4,
-                        CONDITIONAL:
+                        my_vars.CONDITIONAL:
                             {
                                 'high':
                                     Counter({
@@ -81,3 +81,50 @@ class TestFindNeighbors(TestCase):
         neighbors = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
         self.assertTrue(neighbors.shape[0] == k)
         self.assertTrue(neighbors.equals(correct))
+
+    def test_find_neighbors_numeric_nominal_covered(self):
+            """Tests what happens if input has a numeric and a nominal feature and some examples are already covered
+            by the rule"""
+            df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
+                               "C": [3, 2, 1, .5, 3, 2],
+                               "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
+            class_col_name = "Class"
+            lookup = \
+                {
+                    "A":
+                        {
+                            'high': 2,
+                            'low': 4,
+                            my_vars.CONDITIONAL:
+                                {
+                                    'high':
+                                        Counter({
+                                            'banana': 2
+                                        }),
+                                    'low':
+                                        Counter({
+                                            'banana': 2,
+                                            'apple': 2
+                                        })
+                                }
+                        }
+                }
+            k = 4
+            correct = None
+            if k == 1:
+                correct = df.iloc[[5]]
+            elif k == 2:
+                correct = df.iloc[[5, 2]]
+            elif k == 3:
+                correct = df.iloc[[5, 2, 3]]
+            elif k >= 4:
+                # correct = df.iloc[[5, 2, 3, 4]]
+                # Examples at indices 2 and 4 are already covered by the rule, so don't return them as neighbors
+                my_vars.examples_covered_by_rule = {0: {2, 4}}
+                correct = df.iloc[[5, 3]]
+            rule = pd.Series({"A": "high", "B": (1, 1), "Class": "banana"}, name=0)
+            classes = ["apple", "banana"]
+            min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
+
+            neighbors = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
+            self.assertTrue(neighbors.equals(correct))
