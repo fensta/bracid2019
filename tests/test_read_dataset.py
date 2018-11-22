@@ -25,7 +25,6 @@ class TestReadDataset(TestCase):
         src = os.path.join(base_dir, "datasets", "nominal_test.csv")
         # Automatically name the columns
         dataset, lookup, _, _ = read_dataset(src, header=False)
-        print(dataset)
         correct = \
             {0: {
                      'd': 2,

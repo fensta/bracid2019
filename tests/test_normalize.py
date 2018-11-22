@@ -63,7 +63,6 @@ class TestNormalize(TestCase):
                 df[col_name] = normalize_series(col)
         for col_name in df.columns:
             if col_name == "A":
-                print(df["A"])
                 self.assertTrue(df["A"].equals(pd.Series([0.0, 0.5, 1.0])))
             else:
                 self.assertTrue(df["B"].equals(pd.Series([1.0, 0.5, 0.0])))

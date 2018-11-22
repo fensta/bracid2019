@@ -16,7 +16,7 @@ class TestMostSpecificGeneralization(TestCase):
         correct = rules[0].copy()
         for i, _ in dataset.iterrows():
             nearest_example = dataset.iloc[[i]]
-            print("example", type(nearest_example), nearest_example, type(nearest_example["A"]), nearest_example["A"])
+            # print("example", type(nearest_example), nearest_example, type(nearest_example["A"]), nearest_example["A"])
             rule = rules[i]
             rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
             self.assertTrue(rule.equals(correct))
