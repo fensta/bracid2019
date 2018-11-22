@@ -179,7 +179,7 @@ class TestAddTags(TestCase):
         correct = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
                                 "C": [3, 2, 1, .5, 3, 2],
                                 "Class": ["apple", "apple", "banana", "banana", "banana", "banana"],
-                                TAG: [BORDERLINE, BORDERLINE, SAFE, NOISY, SAFE, BORDERLINE]
+                                TAG: [BORDERLINE, BORDERLINE, SAFE, NOISY, NOISY, BORDERLINE]
                                 })
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"C": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
@@ -189,10 +189,9 @@ class TestAddTags(TestCase):
             pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
             pd.Series({"A": "high", "B": (4, 4), "C": (1, 1), "Class": "banana"}, name=2),
             pd.Series({"A": "low", "B": (1.5, 1.5), "C": (0.5, 0.5), "Class": "banana"}, name=3),
-            pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "apple"}, name=4),
+            pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
             pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
         ]
         tagged = add_tags(df, k, rules, class_col_name, lookup, min_max, classes)
-        print("result:\n{}".format(tagged))
         # Due to floating point precision, use approximate comparison
         self.assertTrue(tagged.equals(correct))
