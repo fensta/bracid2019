@@ -1,33 +1,41 @@
 from unittest import TestCase
 
 from scripts.utils import f1
+import scripts.vars as my_vars
 
 
 class TestF1(TestCase):
     """Test f1() in utils.py"""
 
-    def test_f1_exception(self):
-        """Tests if exception is thrown in case of unequal list lengths"""
-        predicted = ["a", "b", "a"]
-        true = ["a", "a"]
-        positive = "a"
-        self.assertRaises(Exception, f1, predicted, true, positive)
+    # def test_f1_exception(self):
+    #     """Tests if exception is thrown in case of unequal list lengths"""
+    #     predicted = ["a", "b", "a"]
+    #     true = ["a", "a"]
+    #     positive = "a"
+    #     self.assertRaises(Exception, f1, predicted, true, positive)
 
     def test_f1_high_recall(self):
         """Tests if F1 is computed correctly"""
-        predicted = ["b", "a", "a", "a", "a", "a", "a", "b"]
-        true = ["a", "a", "a", "b", "b", "b", "b", "b"]
-        positive = "a"
-        score = f1(predicted, true, positive)
+        my_vars.conf_matrix = {
+            my_vars.TP: {1, 2},
+            my_vars.TN: {7},
+            my_vars.FP: {3, 4, 5, 6},
+            my_vars.FN: {0},
+        }
+        score = f1()
+        # Assume that positive class is "a"
         correct = 2*1/3*2/3
         self.assertTrue(score == correct)
 
     def test_f1_high_precision(self):
         """Tests if F1 is computed correctly"""
-        predicted = ["a", "a", "b", "b", "a", "b", "a", "b"]
-        true = ["a", "a", "a", "a", "b", "a", "a", "a"]
-        positive = "a"
-        score = f1(predicted, true, positive)
+        my_vars.conf_matrix = {
+            my_vars.TP: {0, 1, 6},
+            my_vars.TN: {},
+            my_vars.FP: {4, },
+            my_vars.FN: {2, 3, 5, 7},
+        }
+        # Assume that positive class is "a"
         correct = 2*3/7*3/4 / (3/7 + 3/4)
         self.assertTrue(score == correct)
 
