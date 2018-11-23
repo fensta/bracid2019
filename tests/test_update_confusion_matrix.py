@@ -37,5 +37,4 @@ class TestUpdateConfusionMatrix(TestCase):
             my_vars.FN: {4},
             my_vars.FP: {2, 5},
         }
-        print(my_vars.conf_matrix)
         self.assertTrue(correct == my_vars.conf_matrix)
