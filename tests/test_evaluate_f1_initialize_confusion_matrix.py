@@ -44,14 +44,18 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
             pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
         ]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-        tagged, initial_rules = add_tags_and_extract_rules(df, 2, class_col_name, lookup, min_max, classes)
-        print("init rules")
-        print(initial_rules)
-        print("dataset")
-        print(df)
-        # for _, e in extracted.iterrows():
-        #     print(e)
-        #     print(e.name)
-        print(my_vars.seed_mapping)
-        evaluate_f1_initialize_confusion_matrix(df, initial_rules, class_col_name, lookup, min_max, classes)
-        self.fail()
+        my_vars.positive_class = "apple"
+        # tagged, initial_rules = add_tags_and_extract_rules(df, 2, class_col_name, lookup, min_max, classes)
+        # print("init rules")
+        # print(rules)
+        # print("dataset")
+        # print(df)
+        # print(my_vars.seed_mapping)
+        correct_f1 = 2*1*0.5/1.5
+        f1 = evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
+        # print(my_vars.closest_rule_per_example)
+        # print(my_vars.conf_matrix)
+        # print(f1)
+        correct_closest_rule_per_example = {0: 1, 1: 0, 2: 5, 3: 1, 4: 0, 5: 2}
+        self.assertTrue(f1 == correct_f1)
+        self.assertTrue(my_vars.closest_rule_per_example == correct_closest_rule_per_example)

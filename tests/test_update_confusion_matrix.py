@@ -11,6 +11,7 @@ class TestUpdateConfusionMatrix(TestCase):
 
     def test_update_confusion_matrix(self):
         """Tests that TP, FN, FP, TN are updated correctly"""
+        my_vars.conf_matrix = {my_vars.TP: set(), my_vars.FP: set(), my_vars.TN: set(), my_vars.FN: set()}
         my_vars.conf_matrix[my_vars.TP].add(0)
         my_vars.conf_matrix[my_vars.TN].add(1)
         my_vars.conf_matrix[my_vars.FP].add(2)
