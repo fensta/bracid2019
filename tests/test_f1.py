@@ -37,6 +37,7 @@ class TestF1(TestCase):
         }
         # Assume that positive class is "a"
         correct = 2*3/7*3/4 / (3/7 + 3/4)
+        score = f1()
         self.assertTrue(score == correct)
 
 
