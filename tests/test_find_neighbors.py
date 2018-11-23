@@ -78,7 +78,7 @@ class TestFindNeighbors(TestCase):
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
-        neighbors = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
+        neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
         self.assertTrue(neighbors.shape[0] == k)
         self.assertTrue(neighbors.equals(correct))
 
@@ -126,5 +126,5 @@ class TestFindNeighbors(TestCase):
             classes = ["apple", "banana"]
             min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
-            neighbors = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
+            neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
             self.assertTrue(neighbors.equals(correct))
