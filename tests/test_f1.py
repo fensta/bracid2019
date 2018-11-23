@@ -32,13 +32,27 @@ class TestF1(TestCase):
         my_vars.conf_matrix = {
             my_vars.TP: {0, 1, 6},
             my_vars.TN: {},
-            my_vars.FP: {4, },
+            my_vars.FP: {4},
             my_vars.FN: {2, 3, 5, 7},
         }
         # Assume that positive class is "a"
         correct = 2*3/7*3/4 / (3/7 + 3/4)
         score = f1()
         self.assertTrue(score == correct)
+
+    def test_f1_zero(self):
+        """Tests if F1 is 0 if precision and recall are 0"""
+        my_vars.conf_matrix = {
+            my_vars.TP: {},
+            my_vars.TN: {},
+            my_vars.FP: {},
+            my_vars.FN: {},
+        }
+        # Assume that positive class is "a"
+        correct = 0
+        score = f1()
+        self.assertTrue(score == correct)
+
 
 
 
