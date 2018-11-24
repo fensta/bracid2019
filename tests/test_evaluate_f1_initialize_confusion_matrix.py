@@ -3,11 +3,13 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.utils import evaluate_f1_initialize_confusion_matrix, add_tags_and_extract_rules
+from scripts.utils import evaluate_f1_initialize_confusion_matrix
 import scripts.vars as my_vars
 
 
 class TestEvaluateF1InitializeConfusionMatrix(TestCase):
+    """Tests evaluate_f1_initialize_confusion_matrix() in utils.py"""
+
     def test_evaluate_f1_initialize_confusion_matrix(self):
         """Tests what happens if input has a numeric and a nominal feature"""
         df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
@@ -51,11 +53,20 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
         # print("dataset")
         # print(df)
         # print(my_vars.seed_mapping)
+        # print(f1)
         correct_f1 = 2*1*0.5/1.5
         f1 = evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
         # print(my_vars.closest_rule_per_example)
         # print(my_vars.conf_matrix)
-        # print(f1)
-        correct_closest_rule_per_example = {0: 1, 1: 0, 2: 5, 3: 1, 4: 0, 5: 2}
+        correct_closest_rule_per_example = {
+            0: (1, 0.010000000000000002),
+            1: (0, 0.010000000000000002),
+            2: (5, 0.67015625),
+            3: (1, 0.038125),
+            4: (0, 0.015625),
+            5: (2, 0.67015625)}
         self.assertTrue(f1 == correct_f1)
-        self.assertTrue(my_vars.closest_rule_per_example == correct_closest_rule_per_example)
+        for example_id in my_vars.closest_rule_per_example:
+            rule_id, dist = my_vars.closest_rule_per_example[example_id]
+            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
+                            abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
