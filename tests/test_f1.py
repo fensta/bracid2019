@@ -22,7 +22,7 @@ class TestF1(TestCase):
             my_vars.FP: {3, 4, 5, 6},
             my_vars.FN: {0},
         }
-        score = f1()
+        score = f1(my_vars.conf_matrix)
         # Assume that positive class is "a"
         correct = 2*1/3*2/3
         self.assertTrue(score == correct)
@@ -37,7 +37,7 @@ class TestF1(TestCase):
         }
         # Assume that positive class is "a"
         correct = 2*3/7*3/4 / (3/7 + 3/4)
-        score = f1()
+        score = f1(my_vars.conf_matrix)
         self.assertTrue(score == correct)
 
     def test_f1_zero(self):
@@ -50,7 +50,15 @@ class TestF1(TestCase):
         }
         # Assume that positive class is "a"
         correct = 0
-        score = f1()
+        score = f1(my_vars.conf_matrix)
+        self.assertTrue(score == correct)
+
+    def test_f1_none(self):
+        """Tests if F1 is 0 if confusion matrix is None"""
+        my_vars.conf_matrix = None
+        # Assume that positive class is "a"
+        correct = 0
+        score = f1(my_vars.conf_matrix)
         self.assertTrue(score == correct)
 
 
