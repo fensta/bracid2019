@@ -15,10 +15,10 @@ class TestMostSpecificGeneralization(TestCase):
         rules = [pd.Series({"A": (1.1, 1.1), "B": (1, 1), "C": (2, 2), "D": "x", "Class": "A"})]
         correct = rules[0].copy()
         for i, _ in dataset.iterrows():
-            nearest_example = dataset.iloc[[i]]
+            nearest_example = dataset.iloc[i]
             # print("example", type(nearest_example), nearest_example, type(nearest_example["A"]), nearest_example["A"])
             rule = rules[i]
-            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, dataset.dtypes)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_drop_nominal(self):
@@ -28,9 +28,9 @@ class TestMostSpecificGeneralization(TestCase):
         rules = [pd.Series({"A": (1.1, 1.1), "B": (1, 1), "C": (2, 2), "D": "y", "Class": "A"})]
         correct = pd.Series({"A": (1.1, 1.1), "B": (1, 1), "C": (2, 2), "Class": "A"})
         for i, _ in dataset.iterrows():
-            nearest_example = dataset.iloc[[i]]
+            nearest_example = dataset.iloc[i]
             rule = rules[i]
-            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, dataset.dtypes)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_change_lower(self):
@@ -41,9 +41,9 @@ class TestMostSpecificGeneralization(TestCase):
         rules = [pd.Series({"A": (0.1, 1), "B": (1, 1), "C": (2, 2), "D": "x", "Class": "A"})]
         correct = pd.Series({"A": (lower_bound, 1), "B": (1, 1), "C": (2, 2), "D": "x", "Class": "A"})
         for i, _ in dataset.iterrows():
-            nearest_example = dataset.iloc[[i]]
+            nearest_example = dataset.iloc[i]
             rule = rules[i]
-            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, dataset.dtypes)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_change_upper(self):
@@ -54,9 +54,9 @@ class TestMostSpecificGeneralization(TestCase):
         rules = [pd.Series({"A": (0.1, 1), "B": (1, 1), "C": (2, 2), "D": "x", "Class": "A"})]
         correct = pd.Series({"A": (0.1, upper_bound), "B": (1, 1), "C": (2, 2), "D": "x", "Class": "A"})
         for i, _ in dataset.iterrows():
-            nearest_example = dataset.iloc[[i]]
+            nearest_example = dataset.iloc[i]
             rule = rules[i]
-            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, dataset.dtypes)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_change_multiple(self):
@@ -68,9 +68,9 @@ class TestMostSpecificGeneralization(TestCase):
         rules = [pd.Series({"A": (0.1, 1), "B": (1, 1), "C": (2, 2), "D": "y", "Class": "A"})]
         correct = pd.Series({"A": (0.1, upper_bound), "B": (lower_bound, 1), "C": (lower_bound, 2), "Class": "A"})
         for i, _ in dataset.iterrows():
-            nearest_example = dataset.iloc[[i]]
+            nearest_example = dataset.iloc[i]
             rule = rules[i]
-            rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
+            rule = most_specific_generalization(nearest_example, rule, class_col_name, dataset.dtypes)
             self.assertTrue(rule.equals(correct))
 
     def test_most_specific_generalization_multiple_rules(self):
@@ -85,7 +85,7 @@ class TestMostSpecificGeneralization(TestCase):
         correct = [pd.Series({"A": (0.1, upper_bound), "B": (lower_bound, 1), "C": (lower_bound, 2), "Class": "A"}),
                    pd.Series({"A": (0.1, 1), "B": (1, upper_bound), "C": (2, 2), "D": "y", "Class": "A"})]
         for i, _ in dataset.iterrows():
-            nearest_example = dataset.iloc[[i]]
+            nearest_example = dataset.iloc[i]
             rule = rules[i]
-            updated_rule = most_specific_generalization(nearest_example, rule, class_col_name, i)
+            updated_rule = most_specific_generalization(nearest_example, rule, class_col_name, dataset.dtypes)
             self.assertTrue(updated_rule.equals(correct[i]))
