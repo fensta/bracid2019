@@ -15,6 +15,7 @@ class TestFindNeighbors(TestCase):
         dataset = pd.DataFrame({"A": [1, 2], "B": [1, 2], "C": [2, 2], "D": ["x", "y"], "Class": ["A", "B"]})
         rule = pd.Series({"A": (0.1, 1), "B": (1, 1), "C": (2, 2), "D": "x", "Class": "A"})
         k = 3
+        classes = ["apple", "banana"]
         class_col_name = "Class"
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}, "C": {"min": 1, "max": 2}})
         lookup = \
@@ -36,7 +37,8 @@ class TestFindNeighbors(TestCase):
                             }
                     }
             }
-        self.assertWarns(UserWarning, find_nearest_examples, dataset, k, rule, class_col_name, lookup, min_max, None)
+        self.assertWarns(UserWarning, find_nearest_examples, dataset, k, rule, class_col_name, lookup, min_max, classes,
+                         use_same_label=True, only_uncovered_neighbors=False)
 
     def test_find_neighbors_numeric_nominal(self):
         """Tests what happens if input has a numeric and a nominal feature"""
@@ -78,8 +80,10 @@ class TestFindNeighbors(TestCase):
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
-        neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
-        self.assertTrue(neighbors.shape[0] == k)
+        neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                             use_same_label=True, only_uncovered_neighbors=False)
+        if neighbors is not None:
+            self.assertTrue(neighbors.shape[0] == k)
         self.assertTrue(neighbors.equals(correct))
 
     def test_find_neighbors_numeric_nominal_covered(self):
@@ -126,5 +130,6 @@ class TestFindNeighbors(TestCase):
             classes = ["apple", "banana"]
             min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
-            neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes)
+            neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                 use_same_label=True, only_uncovered_neighbors=True)
             self.assertTrue(neighbors.equals(correct))
