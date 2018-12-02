@@ -64,7 +64,7 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
                             abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
-        correct_conf_matrix = {'tp': {0, 1}, 'fp': {3}, 'tn': {2, 4, 5}, 'fn': set()}
+        correct_conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3}, my_vars.TN: {2, 4, 5}, my_vars.FN: set()}
         self.assertTrue(my_vars.conf_matrix == correct_conf_matrix)
 
     def test_evaluate_f1_update_confusion_matrix_not_updated(self):
@@ -121,5 +121,5 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
                             abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
-        correct_conf_matrix = {'tp': {0, 1}, 'fp': set(), 'tn': {2, 5}, 'fn': {3, 4}}
+        correct_conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         self.assertTrue(my_vars.conf_matrix == correct_conf_matrix)
