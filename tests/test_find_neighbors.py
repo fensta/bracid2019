@@ -38,7 +38,7 @@ class TestFindNeighbors(TestCase):
                     }
             }
         self.assertWarns(UserWarning, find_nearest_examples, dataset, k, rule, class_col_name, lookup, min_max, classes,
-                         use_same_label=True, only_uncovered_neighbors=False)
+                         label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
 
     def test_find_neighbors_numeric_nominal(self):
         """Tests what happens if input has a numeric and a nominal feature"""
@@ -81,9 +81,11 @@ class TestFindNeighbors(TestCase):
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
         neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                             use_same_label=True, only_uncovered_neighbors=False)
+                                             label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
         if neighbors is not None:
             self.assertTrue(neighbors.shape[0] == k)
+        print(neighbors)
+        print(correct)
         self.assertTrue(neighbors.equals(correct))
 
     def test_find_neighbors_numeric_nominal_covered(self):
@@ -131,5 +133,5 @@ class TestFindNeighbors(TestCase):
             min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
             neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                 use_same_label=True, only_uncovered_neighbors=True)
+                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
             self.assertTrue(neighbors.equals(correct))

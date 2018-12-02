@@ -74,7 +74,7 @@ class TestAddAllGoodRules(TestCase):
         print(my_vars.closest_rule_per_example)
         k = 3
         neighbors, dists = find_nearest_examples(df, k, rules[2], class_col_name, lookup, min_max, classes,
-                                                 use_same_label=True, only_uncovered_neighbors=True)
+                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
         improved, updated_rules = add_all_good_rules(df, neighbors, rules[2], rules, initial_f1, class_col_name, lookup,
                                                      min_max, classes)
         self.assertTrue(improved is True)

@@ -61,7 +61,7 @@ class TestAddOneBestRule(TestCase):
         initial_f1 = 0.1
         k = 3
         neighbors, dists = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
-                                                 use_same_label=True, only_uncovered_neighbors=True)
+                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
         improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
                                                     min_max, classes)
         correct_closest_rule_per_example = {
@@ -131,7 +131,7 @@ class TestAddOneBestRule(TestCase):
         initial_f1 = 0.8
         k = 3
         neighbors, dists = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
-                                                 use_same_label=True, only_uncovered_neighbors=True)
+                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
         improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
                                                     min_max, classes)
         correct_closest_rule_per_example = {
