@@ -50,16 +50,8 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
         my_vars.seed_mapping = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         # tagged, initial_rules = add_tags_and_extract_rules(df, 2, class_col_name, lookup, min_max, classes)
-        # print("init rules")
-        # print(rules)
-        # print("dataset")
-        # print(df)
-        # print(my_vars.seed_mapping)
-        # print(f1)
         correct_f1 = 2*1*0.5/1.5
         f1 = evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
-        # print(my_vars.closest_rule_per_example)
-        # print(my_vars.conf_matrix)
         correct_closest_rule_per_example = {
             0: (1, 0.010000000000000002),
             1: (0, 0.010000000000000002),
@@ -67,8 +59,10 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
             3: (1, 0.038125),
             4: (0, 0.015625),
             5: (2, 0.67015625)}
+        correct_conf_matrix = {'tp': {0, 1}, 'fp': {3, 4}, 'tn': {2, 5}, 'fn': set()}
         self.assertTrue(f1 == correct_f1)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
                             abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
+        self.assertTrue(my_vars.conf_matrix == correct_conf_matrix)
