@@ -13,7 +13,7 @@ class TestExtendRule(TestCase):
     def test_extend_rule_only_nominal(self):
         """Test that a rule containing only nominal features is extended correctly"""
         df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
-                           "C": [3, 2, 1, .5, 3, 2],
+                           "C": [3, 2, 1, .5, 3.1, 3.2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
         class_col_name = "Class"
         lookup = \
@@ -47,18 +47,13 @@ class TestExtendRule(TestCase):
             pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
             pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
         ]
-        my_vars.closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.015625),
-            5: (2, 0.67015625)}
+
         k = 3
         extended_rule = extend_rule(df, k, rules[0], class_col_name, lookup, min_max, classes)
+        correct_rule = pd.Series({"A": "low", "B": (0.875, 1.25), "C": (1.75, 3.05), "Class": "apple"}, name=0)
         print("extended rule")
         print(extended_rule)
-        self.fail()
+        self.assertTrue(extended_rule.equals(correct_rule))
 
     def test_extend_rule_only_numeric(self):
         """Test that a rule containing only numeric features is extended correctly"""
