@@ -39,7 +39,7 @@ class TestAddAllGoodRules(TestCase):
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
-        my_vars.positive_class = "banana"
+        my_vars.minority_class = "banana"
         rules = [
             pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
             pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
@@ -73,13 +73,15 @@ class TestAddAllGoodRules(TestCase):
         print("initial closest rule per example")
         print(my_vars.closest_rule_per_example)
         k = 3
-        neighbors, dists = find_nearest_examples(df, k, rules[2], class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[2], class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    True)
         improved, updated_rules = add_all_good_rules(df, neighbors, rules[2], rules, initial_f1, class_col_name, lookup,
                                                      min_max, classes)
         self.assertTrue(improved is True)
+        print(updated_rules)
         print(my_vars.conf_matrix)
-        print(my_vars.examples_covered_by_rule)
+        print("covered", my_vars.examples_covered_by_rule)
         print(my_vars.closest_rule_per_example)
         correct_confusion_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {1}, my_vars.TN: {0}, my_vars.FN: set()}
         correct_closest_rule_per_example = {
@@ -89,6 +91,7 @@ class TestAddAllGoodRules(TestCase):
             3: (2, 0.0),
             4: (2, 0.013906250000000002),
             5: (2, 0.0)}
+        print(correct_closest_rule_per_example)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and

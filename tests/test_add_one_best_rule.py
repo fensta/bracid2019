@@ -38,7 +38,7 @@ class TestAddOneBestRule(TestCase):
             }
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-        my_vars.positive_class = "apple"
+        my_vars.minority_class = "apple"
         rules = [
             pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
             pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
@@ -47,6 +47,12 @@ class TestAddOneBestRule(TestCase):
             pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
             pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
         ]
+        my_vars.closest_examples_per_rule = {
+            0: {1, 4},
+            1: {0, 3},
+            2: {5},
+            5: {2}
+        }
         my_vars.closest_rule_per_example = {
             0: (1, 0.010000000000000002),
             1: (0, 0.010000000000000002),
@@ -54,16 +60,22 @@ class TestAddOneBestRule(TestCase):
             3: (1, 0.038125),
             4: (0, 0.015625),
             5: (2, 0.67015625)}
+        # Reset because other tests change the data
+        my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}, 6: {8}}
+        my_vars.unique_rules = {}
+
         # Actually, correctly it should've been
         # my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         # at the start (i.e. F1=0.66666), but to see if it changes, it's changed
         my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
         initial_f1 = 0.1
         k = 3
-        neighbors, dists = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    True)
         improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
                                                     min_max, classes)
+
         correct_closest_rule_per_example = {
             0: (1, 0.010000000000000002),
             1: (0, 0.0),
@@ -71,6 +83,12 @@ class TestAddOneBestRule(TestCase):
             3: (1, 0.038125),
             4: (0, 0.015625),
             5: (2, 0.67015625)}
+        correct_closest_examples_per_rule = {
+            0: {1, 4},
+            1: {0, 3},
+            2: {5},
+            5: {2}
+        }
         self.assertTrue(improved is True)
         correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=0)
         correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
@@ -81,6 +99,101 @@ class TestAddOneBestRule(TestCase):
                             abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
         self.assertTrue(rules[0].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
+        self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
+
+    def test_add_one_best_rule_update_stats(self):
+        """Tests that rule set is updated when a generalized rule improves F1 and also the mapping of closest rule per
+        example changes"""
+        df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
+                           "C": [3, 2, 1, .5, 3, 2],
+                           "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
+        class_col_name = "Class"
+        lookup = \
+            {
+                "A":
+                    {
+                        'high': 2,
+                        'low': 4,
+                        my_vars.CONDITIONAL:
+                            {
+                                'high':
+                                    Counter({
+                                        'banana': 2
+                                    }),
+                                'low':
+                                    Counter({
+                                        'banana': 2,
+                                        'apple': 2
+                                    })
+                            }
+                    }
+            }
+        classes = ["apple", "banana"]
+        min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
+        my_vars.minority_class = "apple"
+        rules = [
+            pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
+            pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
+            pd.Series({"A": "high", "B": (4, 4), "C": (1, 1), "Class": "banana"}, name=2),
+            pd.Series({"A": "low", "B": (1.5, 1.5), "C": (0.5, 0.5), "Class": "banana"}, name=3),
+            pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
+            pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
+        ]
+        my_vars.closest_examples_per_rule = {
+            0: {4},
+            1: {0, 1, 3},   # Change compared to previous test case
+            2: {5},
+            5: {2}
+        }
+        my_vars.closest_rule_per_example = {
+            0: (1, 0.010000000000000002),
+            1: (1, 0.010000000000000002),   # Change compared to previous test case
+            2: (5, 0.67015625),
+            3: (1, 0.038125),
+            4: (0, 0.015625),
+            5: (2, 0.67015625)}
+        # Reset because other tests change the data
+        my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}, 6: {8}}
+        my_vars.unique_rules = {}
+
+        # Actually, correctly it should've been
+        # my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
+        # at the start (i.e. F1=0.66666), but to see if it changes, it's changed
+        my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
+        initial_f1 = 0.1
+        k = 3
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    True)
+        improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
+                                                    min_max, classes)
+
+        correct_closest_rule_per_example = {
+            0: (1, 0.010000000000000002),
+            1: (0, 0.0),
+            2: (5, 0.67015625),
+            3: (1, 0.038125),
+            4: (0, 0.015625),
+            5: (2, 0.67015625)}
+        correct_closest_examples_per_rule = {
+            0: {1, 4},
+            1: {0, 3},
+            2: {5},
+            5: {2}
+        }
+        self.assertTrue(improved is True)
+        correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=0)
+        correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
+        # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
+        for example_id in my_vars.closest_rule_per_example:
+            rule_id, dist = my_vars.closest_rule_per_example[example_id]
+            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
+                            abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
+        self.assertTrue(rules[0].equals(correct_generalized_rule))
+        self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
+        print(correct_closest_examples_per_rule)
+        print(my_vars.closest_examples_per_rule)
+        self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
 
     def test_add_one_best_rule_no_update(self):
         """Tests that rule set is not updated when no generalized rule improves F1"""
@@ -110,7 +223,7 @@ class TestAddOneBestRule(TestCase):
             }
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-        my_vars.positive_class = "apple"
+        my_vars.minority_class = "apple"
         rules = [
             pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
             pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
@@ -130,8 +243,9 @@ class TestAddOneBestRule(TestCase):
         # F1 is actually 0.6666, but setting it to 0.8 makes it not update any rule
         initial_f1 = 0.8
         k = 3
-        neighbors, dists = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    True)
         improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
                                                     min_max, classes)
         correct_closest_rule_per_example = {
@@ -181,7 +295,7 @@ class TestAddOneBestRule(TestCase):
                 }
             classes = ["apple", "banana"]
             min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-            my_vars.positive_class = "apple"
+            my_vars.minority_class = "apple"
             # name=6 because this guy already exists in the rules and the new rule with name=0 becomes the same, so
             # it's removed
             correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=6)
@@ -220,9 +334,9 @@ class TestAddOneBestRule(TestCase):
             my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
             initial_f1 = 0.1
             k = 3
-            neighbors, dists = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
-                                                     label_type=my_vars.SAME_LABEL_AS_RULE,
-                                                     only_uncovered_neighbors=True)
+            neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+                                                        label_type=my_vars.SAME_LABEL_AS_RULE,
+                                                        only_uncovered_neighbors=True)
             improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name,
                                                         lookup,
                                                         min_max, classes)
@@ -235,6 +349,8 @@ class TestAddOneBestRule(TestCase):
                 5: (2, 0.67015625)}
             self.assertTrue(improved is True)
             correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
+            print(my_vars.closest_rule_per_example)
+            print(correct_closest_rule_per_example)
             # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
             for example_id in my_vars.closest_rule_per_example:
                 # 8 was only added to test something else, since it won't be in the result

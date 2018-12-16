@@ -39,7 +39,7 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
             }
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-        my_vars.positive_class = "apple"
+        my_vars.minority_class = "apple"
         my_vars.closest_rule_per_example = {
             0: (1, 0.010000000000000002),
             1: (0, 0.010000000000000002),
@@ -47,6 +47,7 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
             3: (1, 0.038125),
             4: (0, 0.015625),
             5: (2, 0.67015625)}
+        my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3, 4}, my_vars.TN: {2, 5}, my_vars.FN: set()}
         new_rule = pd.Series({"A": "low", "B": (0.5, 1.0), "C": (3, 3), "Class": "banana"}, name=0)
         # tagged, initial_rules = add_tags_and_extract_rules(df, 2, class_col_name, lookup, min_max, classes)
@@ -96,7 +97,7 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
             }
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
-        my_vars.positive_class = "apple"
+        my_vars.minority_class = "apple"
         my_vars.closest_rule_per_example = {
             0: (1, 0.010000000000000002),
             1: (0, 0.010000000000000002),

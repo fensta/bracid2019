@@ -79,9 +79,10 @@ class TestFindNeighbors(TestCase):
         rule = pd.Series({"A": "high", "B": (1, 1), "Class": "banana"})
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
-
-        neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                             label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
+        # Reset as other tests changed the content of the dictionary
+        my_vars.closest_rule_per_example = {}
+        neighbors, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
         if neighbors is not None:
             self.assertTrue(neighbors.shape[0] == k)
         print(neighbors)
@@ -121,13 +122,14 @@ class TestFindNeighbors(TestCase):
         rule = pd.Series({"A": "high", "B": (1, 1), "Class": "banana"})
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
-        neighbors_all, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.ALL_LABELS, only_uncovered_neighbors=False)
-        neighbors_same, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                  label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
-        neighbors_opposite, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                      label_type=my_vars.OPPOSITE_LABEL_TO_RULE,
-                                                      only_uncovered_neighbors=False)
+        neighbors_all, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.ALL_LABELS, only_uncovered_neighbors=False)
+        neighbors_same, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                     False)
+        neighbors_opposite, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                         label_type=my_vars.OPPOSITE_LABEL_TO_RULE,
+                                                         only_uncovered_neighbors=False)
         self.assertTrue(neighbors_all.equals(correct_all))
         self.assertTrue(neighbors_same.equals(correct_same))
         self.assertTrue(neighbors_opposite.equals(correct_opposite))
@@ -176,8 +178,9 @@ class TestFindNeighbors(TestCase):
             classes = ["apple", "banana"]
             min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
 
-            neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=True)
+            neighbors, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    True)
             self.assertTrue(neighbors.equals(correct))
 
     def test_find_neighbors_numeric_nominal_stats(self):
@@ -213,21 +216,27 @@ class TestFindNeighbors(TestCase):
                 3: (1, 0.038125),
                 4: (0, 0.015625),
                 5: (2, 0.67015625)}
+            # Reset because other tests added data, so if you only run this test it would work, but not if other
+            # tests are run prior to that
+            my_vars.examples_covered_by_rule = {}
             my_vars.closest_examples_per_rule = {0: {1, 4}, 1: {0, 3}, 2: {5}, 5: {2}}
             k = 4
             correct = df.iloc[[5, 2, 3, 4]]
             rule = pd.Series({"A": "high", "B": (1, 1), "Class": "banana"}, name=0)
             classes = ["apple", "banana"]
-            my_vars.positive_class = "banana"
+            my_vars.minority_class = "banana"
             min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
             correct_covered = {}
             correct_examples_per_rule = {0: {1, 2, 4, 5}, 1: {0, 3}}
             correct_closest_rule_per_example = {
                 0: (1, 0.010000000000000002), 1: (0, 0.010000000000000002), 2: (0, 0.09), 3: (1, 0.038125),
                 4: (0, 0.015625), 5: (0, 0.0006250000000000001)}
-            neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
+            neighbors, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    False)
             self.assertTrue(neighbors.equals(correct))
+            print(correct_covered)
+            print(my_vars.examples_covered_by_rule)
             self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
             self.assertTrue(correct_examples_per_rule == my_vars.closest_examples_per_rule)
             for example_id, (rule_id, dist) in correct_closest_rule_per_example.items():
@@ -275,7 +284,7 @@ class TestFindNeighbors(TestCase):
             correct = df.iloc[[2, 3, 5, 4]]
             rule = pd.Series({"A": "high", "B": (1, 1), "Class": "banana"}, name=0)
             classes = ["apple", "banana"]
-            my_vars.positive_class = "banana"
+            my_vars.minority_class = "banana"
             min_max = pd.DataFrame({"A": {"min": 1, "max": 5}, "B": {"min": 1, "max": 11}})
             # An example could be covered by multiple rules, so example 2 should be covered by rules 0 and 1 at the end
             my_vars.examples_covered_by_rule = {1: {2}}
@@ -284,8 +293,9 @@ class TestFindNeighbors(TestCase):
             correct_closest_rule_per_example = {
                 0: (1, 0.010000000000000002), 1: (0, 0.010000000000000002), 2: (0, 0.0), 3: (0, 0.0),
                 4: (0, 0.015625), 5: (0, 0.0006250000000000001)}
-            neighbors, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
-                                                 label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=False)
+            neighbors, _, _ = find_nearest_examples(df, k, rule, class_col_name, lookup, min_max, classes,
+                                                    label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
+                                                    False)
             self.assertTrue(neighbors.equals(correct))
             self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
             self.assertTrue(correct_examples_per_rule == my_vars.closest_examples_per_rule)
