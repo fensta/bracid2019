@@ -3,7 +3,7 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.utils import evaluate_f1_update_confusion_matrix
+from scripts.utils import evaluate_f1_update_confusion_matrix, Data
 import scripts.vars as my_vars
 
 
@@ -41,12 +41,12 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         my_vars.minority_class = "apple"
         my_vars.closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.015625),
-            5: (2, 0.67015625)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=0, dist=0.010000000000000002),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=1, dist=0.038125),
+            4: Data(rule_id=0, dist=0.015625),
+            5: Data(rule_id=2, dist=0.67015625)}
         my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3, 4}, my_vars.TN: {2, 5}, my_vars.FN: set()}
         new_rule = pd.Series({"A": "low", "B": (0.5, 1.0), "C": (3, 3), "Class": "banana"}, name=0)
@@ -54,12 +54,12 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
         correct_f1 = 0.8
         f1 = evaluate_f1_update_confusion_matrix(df, new_rule, class_col_name, lookup, min_max, classes)
         correct_closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.0),
-            5: (2, 0.67015625)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=0, dist=0.010000000000000002),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=1, dist=0.038125),
+            4: Data(rule_id=0, dist=0.0),
+            5: Data(rule_id=2, dist=0.67015625)}
         self.assertTrue(f1 == correct_f1)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
@@ -99,24 +99,24 @@ class TestEvaluateF1UpdateConfusionMatrix(TestCase):
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         my_vars.minority_class = "apple"
         my_vars.closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.015625),
-            5: (2, 0.67015625)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=0, dist=0.010000000000000002),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=1, dist=0.038125),
+            4: Data(rule_id=0, dist=0.015625),
+            5: Data(rule_id=2, dist=0.67015625)}
         my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         new_rule = pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4)
         correct_f1 = 2*1*0.5/1.5
 
         f1 = evaluate_f1_update_confusion_matrix(df, new_rule, class_col_name, lookup, min_max, classes)
         correct_closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.015625),
-            5: (2, 0.67015625)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=0, dist=0.010000000000000002),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=1, dist=0.038125),
+            4: Data(rule_id=0, dist=0.015625),
+            5: Data(rule_id=2, dist=0.67015625)}
         self.assertTrue(f1 == correct_f1)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
