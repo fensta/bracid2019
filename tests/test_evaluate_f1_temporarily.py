@@ -4,7 +4,7 @@ import copy
 
 import pandas as pd
 
-from scripts.utils import evaluate_f1_temporarily, Data
+from scripts.utils import evaluate_f1_temporarily, Data, Bounds
 import scripts.vars as my_vars
 
 
@@ -42,6 +42,24 @@ class TestEvaluateF1Temporarily(TestCase):
         my_vars.minority_class = "apple"
         # Reset as other tests change the data
         my_vars.examples_covered_by_rule = {}
+        my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+
+        rules = [
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                      name=0),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
+                      name=1),
+            pd.Series({"A": "high", "B": Bounds(lower=4, upper=4), "C": Bounds(lower=1, upper=1),
+                       "Class": "banana"}, name=2),
+            pd.Series({"A": "low", "B": Bounds(lower=1.5, upper=1.5), "C": Bounds(lower=0.5, upper=0.5),
+                       "Class": "banana"}, name=3),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3, upper=3),
+                       "Class": "banana"}, name=4),
+            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2, upper=2),
+                       "Class": "banana"}, name=5)
+        ]
+        my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
 
         my_vars.closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -59,7 +77,8 @@ class TestEvaluateF1Temporarily(TestCase):
         correct_closest_rules = copy.deepcopy(my_vars.closest_rule_per_example)
         correct_closest_examples = copy.deepcopy(my_vars.closest_examples_per_rule)
         my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3, 4}, my_vars.TN: {2, 5}, my_vars.FN: set()}
-        new_rule = pd.Series({"A": "low", "B": (0.5, 1.0), "C": (3, 3), "Class": "banana"}, name=0)
+        new_rule = pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.0), "C": Bounds(lower=3, upper=3),
+                              "Class": "banana"}, name=0)
         correct_f1 = 0.8
 
         f1, conf_matrix, closest_rules, closest_examples, covered = \
@@ -72,6 +91,7 @@ class TestEvaluateF1Temporarily(TestCase):
             4: Data(rule_id=0, dist=0.0),
             5: Data(rule_id=2, dist=0.67015625)}
         correct_covered = {0: {4}}
+
         print(my_vars.examples_covered_by_rule)
         self.assertTrue(f1 == correct_f1)
         # Local result is still the same as in test_evaluate_f1_update_confusion_matrix.py

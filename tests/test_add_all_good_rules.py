@@ -3,7 +3,8 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.utils import add_all_good_rules, find_nearest_examples, evaluate_f1_initialize_confusion_matrix
+from scripts.utils import add_all_good_rules, find_nearest_examples, evaluate_f1_initialize_confusion_matrix, Data, \
+    Bounds
 import scripts.vars as my_vars
 
 
@@ -41,20 +42,28 @@ class TestAddAllGoodRules(TestCase):
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
         my_vars.minority_class = "banana"
         rules = [
-            pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
-            pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
-            pd.Series({"A": "high", "B": (4, 4), "C": (1, 1), "Class": "banana"}, name=2),
-            pd.Series({"A": "low", "B": (1.5, 1.5), "C": (0.5, 0.5), "Class": "banana"}, name=3),
-            pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
-            pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                      name=0),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
+                      name=1),
+            pd.Series({"A": "high", "B": Bounds(lower=4, upper=4), "C": Bounds(lower=1, upper=1),
+                       "Class": "banana"}, name=2),
+            pd.Series({"A": "low", "B": Bounds(lower=1.5, upper=1.5), "C": Bounds(lower=0.5, upper=0.5),
+                       "Class": "banana"}, name=3),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3, upper=3),
+                       "Class": "banana"}, name=4),
+            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2, upper=2),
+                       "Class": "banana"}, name=5)
         ]
+
+
         initial_correct_closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.015625),
-            5: (2, 0.67015625)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=0, dist=0.010000000000000002),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=1, dist=0.038125),
+            4: Data(rule_id=0, dist=0.015625),
+            5: Data(rule_id=2, dist=0.67015625)}
         initial_f1 = evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
         correct_confusion_matrix = {my_vars.TP: {2, 5}, my_vars.FP: set(), my_vars.TN: {0, 1}, my_vars.FN: {3, 4}}
         print(my_vars.conf_matrix)
@@ -85,12 +94,12 @@ class TestAddAllGoodRules(TestCase):
         print(my_vars.closest_rule_per_example)
         correct_confusion_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {1}, my_vars.TN: {0}, my_vars.FN: set()}
         correct_closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (2, 0.0),
-            2: (5, 0.67015625),
-            3: (2, 0.0),
-            4: (2, 0.013906250000000002),
-            5: (2, 0.0)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=2, dist=0.0),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=2, dist=0.0),
+            4: Data(rule_id=2, dist=0.013906250000000002),
+            5: Data(rule_id=2, dist=0.0)}
         print(correct_closest_rule_per_example)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
