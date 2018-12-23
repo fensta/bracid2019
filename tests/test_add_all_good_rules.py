@@ -56,7 +56,11 @@ class TestAddAllGoodRules(TestCase):
                        "Class": "banana"}, name=5)
         ]
 
-
+        my_vars.latest_id = len(rules) - 1
+        my_vars.examples_covered_by_rule = {}
+        my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
+        my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         initial_correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
             1: Data(rule_id=0, dist=0.010000000000000002),
@@ -66,7 +70,7 @@ class TestAddAllGoodRules(TestCase):
             5: Data(rule_id=2, dist=0.67015625)}
         initial_f1 = evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
         correct_confusion_matrix = {my_vars.TP: {2, 5}, my_vars.FP: set(), my_vars.TN: {0, 1}, my_vars.FN: {3, 4}}
-        print(my_vars.conf_matrix)
+        correct_rules = 8
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
 
         # Make sure confusion matrix, closest rule per example are correct at the beginning
@@ -77,32 +81,29 @@ class TestAddAllGoodRules(TestCase):
 
         correct_initial_f1 = 2 * 0.5 * 1 / 1.5
         self.assertTrue(initial_f1 == correct_initial_f1)
-        print("initial confusion matrix")
-        print(my_vars.conf_matrix)
-        print("initial closest rule per example")
-        print(my_vars.closest_rule_per_example)
         k = 3
         neighbors, dists, _ = find_nearest_examples(df, k, rules[2], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
+        print("neighbors")
+        print(neighbors)
+        print(dists)
         improved, updated_rules = add_all_good_rules(df, neighbors, rules[2], rules, initial_f1, class_col_name, lookup,
                                                      min_max, classes)
         self.assertTrue(improved is True)
-        print(updated_rules)
-        print(my_vars.conf_matrix)
-        print("covered", my_vars.examples_covered_by_rule)
-        print(my_vars.closest_rule_per_example)
-        correct_confusion_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {1}, my_vars.TN: {0}, my_vars.FN: set()}
+        correct_covered = {2: {0, 1, 2, 3, 4, 5}}
+        correct_confusion_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {0, 1}, my_vars.TN: set(), my_vars.FN: set()}
         correct_closest_rule_per_example = {
-            0: Data(rule_id=1, dist=0.010000000000000002),
+            0: Data(rule_id=2, dist=0.0),
             1: Data(rule_id=2, dist=0.0),
-            2: Data(rule_id=5, dist=0.67015625),
+            2: Data(rule_id=2, dist=0.0),
             3: Data(rule_id=2, dist=0.0),
-            4: Data(rule_id=2, dist=0.013906250000000002),
+            4: Data(rule_id=2, dist=0.0),
             5: Data(rule_id=2, dist=0.0)}
-        print(correct_closest_rule_per_example)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
                             abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
+        self.assertTrue(len(updated_rules) == correct_rules and my_vars.latest_id == (correct_rules - 1))
+        self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
