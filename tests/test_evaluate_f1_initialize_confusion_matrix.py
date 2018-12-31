@@ -59,7 +59,7 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
         my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
 
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
-        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         # Note: examples_covered_by_rule implicitly includes the seeds of all rules
         my_vars.examples_covered_by_rule = {}
 

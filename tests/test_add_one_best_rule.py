@@ -71,7 +71,7 @@ class TestAddOneBestRule(TestCase):
         my_vars.examples_covered_by_rule = {}
         my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
-        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         # Note: examples_covered_by_rule implicitly includes the seeds of all rules
         my_vars.unique_rules = {}
 
@@ -175,7 +175,7 @@ class TestAddOneBestRule(TestCase):
         my_vars.examples_covered_by_rule = {}
         my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
-        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         my_vars.unique_rules = {}
 
         # Actually, correctly it should've been
@@ -270,7 +270,7 @@ class TestAddOneBestRule(TestCase):
             5: Data(rule_id=2, dist=0.67015625)}
         my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
-        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         # F1 is actually 0.6666, but setting it to 0.8 makes it not update any rule
         initial_f1 = 0.8
@@ -356,7 +356,7 @@ class TestAddOneBestRule(TestCase):
             my_vars.examples_covered_by_rule = {}
             my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
             my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
-            my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+            my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
 
             my_vars.closest_examples_per_rule = {0: {1, 4}, 1: {0, 3}, 2: {5}, 5: {2}}
             # Note that 6: {8} is incorrect and was just added to test if the entries are merged correctly

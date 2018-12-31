@@ -60,7 +60,7 @@ class TestAddAllGoodRules(TestCase):
         my_vars.examples_covered_by_rule = {}
         my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[test_idx], 3: rules[2], 4: rules[3], 5: rules[4]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
-        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         initial_correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
             1: Data(rule_id=0, dist=0.010000000000000002),
@@ -71,6 +71,8 @@ class TestAddAllGoodRules(TestCase):
         initial_f1 = evaluate_f1_initialize_confusion_matrix(df, rules, class_col_name, lookup, min_max, classes)
         correct_confusion_matrix = {my_vars.TP: {2, 5}, my_vars.FP: set(), my_vars.TN: {0, 1}, my_vars.FN: {3, 4}}
         correct_rules = 8
+        print(my_vars.conf_matrix)
+        print(correct_confusion_matrix)
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
         print(my_vars.closest_rule_per_example)
 
