@@ -40,8 +40,6 @@ class TestAddOneBestRule(TestCase):
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         my_vars.minority_class = "apple"
         rules = [
-            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
-                      name=0),
             pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
                       name=1),
             pd.Series({"A": "high", "B": Bounds(lower=4, upper=4), "C": Bounds(lower=1, upper=1),
@@ -51,7 +49,9 @@ class TestAddOneBestRule(TestCase):
             pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3, upper=3),
                        "Class": "banana"}, name=4),
             pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2, upper=2),
-                       "Class": "banana"}, name=5)
+                       "Class": "banana"}, name=5),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                      name=0)  # Current rule is always at the end of the list
         ]
         my_vars.closest_examples_per_rule = {
             0: {1, 4},
@@ -66,9 +66,10 @@ class TestAddOneBestRule(TestCase):
             3: Data(rule_id=1, dist=0.038125),
             4: Data(rule_id=0, dist=0.015625),
             5: Data(rule_id=2, dist=0.67015625)}
+        test_idx = -1
         # Reset because other tests change the data
         my_vars.examples_covered_by_rule = {}
-        my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
+        my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
         my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         # Note: examples_covered_by_rule implicitly includes the seeds of all rules
@@ -80,11 +81,11 @@ class TestAddOneBestRule(TestCase):
         my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
         initial_f1 = 0.1
         k = 3
-        neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
-        improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
-                                                    min_max, classes)
+        improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
+                                                    lookup, min_max, classes)
 
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -105,9 +106,9 @@ class TestAddOneBestRule(TestCase):
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
-            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
-                            abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
-        self.assertTrue(rules[0].equals(correct_generalized_rule))
+            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
+                            abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
+        self.assertTrue(rules[test_idx].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
         self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
 
@@ -138,12 +139,11 @@ class TestAddOneBestRule(TestCase):
                             }
                     }
             }
+        test_idx = -1
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         my_vars.minority_class = "apple"
         rules = [
-            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
-                      name=0),
             pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
                       name=1),
             pd.Series({"A": "high", "B": Bounds(lower=4, upper=4), "C": Bounds(lower=1, upper=1),
@@ -153,7 +153,9 @@ class TestAddOneBestRule(TestCase):
             pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3, upper=3),
                        "Class": "banana"}, name=4),
             pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2, upper=2),
-                       "Class": "banana"}, name=5)
+                       "Class": "banana"}, name=5),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                      name=0)  # Current rule is always at the end of the list
         ]
         my_vars.closest_examples_per_rule = {
             0: {4},
@@ -171,7 +173,7 @@ class TestAddOneBestRule(TestCase):
         # Reset because other tests change the data
         # my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}, 6: {8}}
         my_vars.examples_covered_by_rule = {}
-        my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
+        my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
         my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         my_vars.unique_rules = {}
@@ -182,11 +184,11 @@ class TestAddOneBestRule(TestCase):
         my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
         initial_f1 = 0.1
         k = 3
-        neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
-        improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
-                                                    min_max, classes)
+        improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
+                                                    lookup, min_max, classes)
 
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -207,9 +209,9 @@ class TestAddOneBestRule(TestCase):
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
-            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
-                            abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
-        self.assertTrue(rules[0].equals(correct_generalized_rule))
+            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
+                            abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
+        self.assertTrue(rules[test_idx].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
         print(correct_closest_examples_per_rule)
         print(my_vars.closest_examples_per_rule)
@@ -241,12 +243,11 @@ class TestAddOneBestRule(TestCase):
                             }
                     }
             }
+        test_idx = -1
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         my_vars.minority_class = "apple"
         rules = [
-            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
-                      name=0),
             pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
                       name=1),
             pd.Series({"A": "high", "B": Bounds(lower=4, upper=4), "C": Bounds(lower=1, upper=1),
@@ -256,7 +257,9 @@ class TestAddOneBestRule(TestCase):
             pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3, upper=3),
                        "Class": "banana"}, name=4),
             pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2, upper=2),
-                       "Class": "banana"}, name=5)
+                       "Class": "banana"}, name=5),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                      name=0)   # Current rule is always at the end of the list
         ]
         my_vars.closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -265,18 +268,18 @@ class TestAddOneBestRule(TestCase):
             3: Data(rule_id=1, dist=0.038125),
             4: Data(rule_id=0, dist=0.015625),
             5: Data(rule_id=2, dist=0.67015625)}
-        my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
+        my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         # F1 is actually 0.6666, but setting it to 0.8 makes it not update any rule
         initial_f1 = 0.8
         k = 3
-        neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
+        neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
-        improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name, lookup,
-                                                    min_max, classes)
+        improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
+                                                    lookup, min_max, classes)
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
             1: Data(rule_id=0, dist=0.010000000000000002),
@@ -290,9 +293,9 @@ class TestAddOneBestRule(TestCase):
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
-            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
-                            abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
-        self.assertTrue(rules[0].equals(correct_generalized_rule))
+            self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
+                            abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
+        self.assertTrue(rules[test_idx].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
 
     def test_add_one_best_rule_unique(self):
@@ -322,6 +325,7 @@ class TestAddOneBestRule(TestCase):
                                 }
                         }
                 }
+            test_idx = -1
             classes = ["apple", "banana"]
             min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
             my_vars.minority_class = "apple"
@@ -329,8 +333,6 @@ class TestAddOneBestRule(TestCase):
             # it's removed
             correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=6)
             rules = [
-                pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
-                          name=0),
                 pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
                           name=1),
                 pd.Series({"A": "high", "B": Bounds(lower=4, upper=4), "C": Bounds(lower=1, upper=1),
@@ -342,7 +344,9 @@ class TestAddOneBestRule(TestCase):
                 pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2, upper=2),
                            "Class": "banana"}, name=5),
                 pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2.0, upper=3),
-                           "Class": "apple"}, name=6)  # same as best rule
+                           "Class": "apple"}, name=6),   # same as best rule
+                pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                          name=0)  # Current rule is always at the end of the list
             ]
             for rule in rules:
                 rule_hash = compute_hash(rule)
@@ -350,7 +354,7 @@ class TestAddOneBestRule(TestCase):
             correct_generalized_rule_hash = compute_hash(correct_generalized_rule)
 
             my_vars.examples_covered_by_rule = {}
-            my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
+            my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
             my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
             my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
 
@@ -374,12 +378,11 @@ class TestAddOneBestRule(TestCase):
             my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
             initial_f1 = 0.1
             k = 3
-            neighbors, dists, _ = find_nearest_examples(df, k, rules[0], class_col_name, lookup, min_max, classes,
-                                                        label_type=my_vars.SAME_LABEL_AS_RULE,
+            neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max,
+                                                        classes, label_type=my_vars.SAME_LABEL_AS_RULE,
                                                         only_uncovered_neighbors=True)
-            improved, updated_rules = add_one_best_rule(df, neighbors, rules[0], rules, initial_f1, class_col_name,
-                                                        lookup,
-                                                        min_max, classes)
+            improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1,
+                                                        class_col_name, lookup, min_max, classes)
             correct_closest_rule_per_example = {
                 0: Data(rule_id=1, dist=0.010000000000000002),
                 1: Data(rule_id=6, dist=0.0),
@@ -396,7 +399,7 @@ class TestAddOneBestRule(TestCase):
                 # 8 was only added to test something else, since it won't be in the result
                 if example_id != 8:
                     rule_id, dist = my_vars.closest_rule_per_example[example_id]
-                    self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
-                                    abs(dist - correct_closest_rule_per_example[example_id][1]) < 0.001)
+                    self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
+                                    abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
             self.assertTrue(rules[5].equals(correct_generalized_rule))
             self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
