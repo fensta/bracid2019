@@ -108,7 +108,7 @@ class TestAddOneBestRule(TestCase):
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
-        self.assertTrue(rules[test_idx].equals(correct_generalized_rule))
+        self.assertTrue(updated_rules[test_idx].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
         self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
 
@@ -211,7 +211,7 @@ class TestAddOneBestRule(TestCase):
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
-        self.assertTrue(rules[test_idx].equals(correct_generalized_rule))
+        self.assertTrue(updated_rules[test_idx].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
         print(correct_closest_examples_per_rule)
         print(my_vars.closest_examples_per_rule)
@@ -288,14 +288,18 @@ class TestAddOneBestRule(TestCase):
             4: Data(rule_id=0, dist=0.015625),
             5: Data(rule_id=2, dist=0.67015625)}
         self.assertTrue(improved is False)
-        correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=0)
+        correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0)
         correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
-        self.assertTrue(rules[test_idx].equals(correct_generalized_rule))
+        print(rules[test_idx])
+        print(correct_generalized_rule)
+        print("updated")
+        print(updated_rules)
+        self.assertTrue(updated_rules[test_idx].equals(correct_generalized_rule))
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
 
     def test_add_one_best_rule_unique(self):
@@ -402,5 +406,5 @@ class TestAddOneBestRule(TestCase):
                     rule_id, dist = my_vars.closest_rule_per_example[example_id]
                     self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                                     abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
-            self.assertTrue(rules[5].equals(correct_generalized_rule))
+            self.assertTrue(updated_rules[5].equals(correct_generalized_rule))
             self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
