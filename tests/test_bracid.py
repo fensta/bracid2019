@@ -3,7 +3,7 @@ from collections import Counter
 
 import pandas as pd
 
-from scripts.utils import bracid
+from scripts.utils import bracid, Bounds
 import scripts.vars as my_vars
 
 
@@ -41,8 +41,10 @@ class TestBracid(TestCase):
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
         my_vars.minority_class = "apple"
         rules = [
-            pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
-            pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=3, upper=3), "Class": "apple"},
+                      name=0),
+            pd.Series({"A": "low", "B": Bounds(lower=1, upper=1), "C": Bounds(lower=2, upper=2), "Class": "apple"},
+                      name=1),
         ]
         initial_correct_closest_rule_per_example = {
             0: (1, 0.010000000000000002),

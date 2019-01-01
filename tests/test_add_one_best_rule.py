@@ -350,11 +350,12 @@ class TestAddOneBestRule(TestCase):
             ]
             for rule in rules:
                 rule_hash = compute_hashable_key(rule)
-                my_vars.unique_rules[rule_hash] = rule.name
+                my_vars.unique_rules[rule_hash] = {rule.name}
             correct_generalized_rule_hash = compute_hashable_key(correct_generalized_rule)
 
             my_vars.examples_covered_by_rule = {}
-            my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0]}
+            my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0],
+                                 6: rules[5]}
             my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
             my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
 
