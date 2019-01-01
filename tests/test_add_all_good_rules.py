@@ -56,7 +56,7 @@ class TestAddAllGoodRules(TestCase):
                        "Class": "banana"}, name=2)  # Current rule to be tested is always at the end
         ]
         test_idx = -1
-        my_vars.latest_id = len(rules) - 1
+        my_vars.latest_rule_id = len(rules) - 1
         my_vars.examples_covered_by_rule = {}
         my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[test_idx], 3: rules[2], 4: rules[3], 5: rules[4]}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
@@ -108,5 +108,5 @@ class TestAddAllGoodRules(TestCase):
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
-        self.assertTrue(len(updated_rules) == correct_rules and my_vars.latest_id == (correct_rules - 1))
+        self.assertTrue(len(updated_rules) == correct_rules and my_vars.latest_rule_id == (correct_rules - 1))
         self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
