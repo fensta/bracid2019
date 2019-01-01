@@ -69,13 +69,15 @@ class TestAddTagsAndExtractRules(TestCase):
 
         correct_latest_id = 5
         correct_seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
-        correct_seed_example_rule = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        correct_seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         correct_all_rules = {0: correct_rules[0], 1: correct_rules[1], 2: correct_rules[2], 3: correct_rules[3],
                              4: correct_rules[4], 5: correct_rules[5]}
         # Note: examples_covered_by_rule implicitly includes the seeds of all rules
         my_vars.examples_covered_by_rule = {}
         tagged, rules = add_tags_and_extract_rules(df, k, class_col_name, lookup, min_max, classes)
         self.assertTrue(tagged.equals(correct))
+        print(my_vars.seed_example_rule)
+        print(correct_seed_example_rule)
         self.assertTrue(my_vars.seed_example_rule == correct_seed_example_rule)
         self.assertTrue(my_vars.seed_rule_example == correct_seed_rule_example)
         self.assertTrue(my_vars.all_rules.keys() == correct_all_rules.keys())
