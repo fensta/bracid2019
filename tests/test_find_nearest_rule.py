@@ -50,34 +50,36 @@ class TestFindNearestRule(TestCase):
         # Reset because other tests change the data
         my_vars.closest_examples_per_rule = {}
         my_vars.closest_rule_per_example = {}
-        my_vars.examples_covered_by_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}, 6: {8}}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}, 6: {8}}
+        my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
+        my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[5]}
+        my_vars.examples_covered_by_rule = {6: {8}}
         my_vars.unique_rules = {}
-
-        # Actually, correctly it should've been
         my_vars.conf_matrix = {}
         for example_id, example in df.iterrows():
             rule, dist, was_updated = find_nearest_rule(rules, example, class_col_name, lookup, min_max, classes,
                                                         my_vars.examples_covered_by_rule)
-            print("eid: {} rule:\n{}\ndist: {} updated: {}".format(example_id, rule, dist, was_updated))
+            # print("eid: {} rule:\n{}\ndist: {} updated: {}".format(example_id, rule, dist, was_updated))
             self.assertTrue(was_updated is True)
 
         correct_closest_rule_per_example = {
-            0: Data(rule_id=1, dist=0.010000000000000002, features=rules[1].size),
-            1: Data(rule_id=0, dist=0.010000000000000002, features=rules[0].size),
-            2: Data(rule_id=5, dist=0.67015625, features=rules[5].size),
-            3: Data(rule_id=1, dist=0.038125, features=rules[1].size),
-            4: Data(rule_id=0, dist=0.015625, features=rules[0].size),
-            5: Data(rule_id=2, dist=0.67015625, features=rules[2].size)}
+            0: Data(rule_id=1, dist=0.010000000000000002),
+            1: Data(rule_id=0, dist=0.010000000000000002),
+            2: Data(rule_id=5, dist=0.67015625),
+            3: Data(rule_id=1, dist=0.038125),
+            4: Data(rule_id=0, dist=0.015625),
+            5: Data(rule_id=2, dist=0.67015625)}
         correct_closest_examples_per_rule = {
             0: {1, 4},
             1: {0, 3},
             2: {5},
             5: {2}
         }
+        print(my_vars.closest_rule_per_example)
+        print(correct_closest_rule_per_example)
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
         for example_id in my_vars.closest_rule_per_example:
-            rule_id, dist, features = my_vars.closest_rule_per_example[example_id]
-            self.assertTrue(features == correct_closest_rule_per_example[example_id].features)
+            rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
         self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
@@ -121,7 +123,7 @@ class TestFindNearestRule(TestCase):
         my_vars.closest_rule_per_example = {}
         my_vars.examples_covered_by_rule = {}
         my_vars.unique_rules = {}
-        my_vars.seed_example_rule = {0: 0, 1: 1, 2: 2}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}}
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2}
         my_vars.all_rules = {0: rules[0], 1: rules[1], 2: rules[2]}
         my_vars.conf_matrix = {}
@@ -137,9 +139,9 @@ class TestFindNearestRule(TestCase):
         # Note: it's permissible that rule 1 covers example 1 (although example 1 is the seed for rule 1)
         # because rule 1 already covers example 0
         correct_closest_rule_per_example = {
-            0: Data(rule_id=1, dist=0.0, features=rules[1].size),
-            1: Data(rule_id=1, dist=0.0, features=rules[1].size),
-            2: Data(rule_id=1, dist=0.0, features=rules[1].size),
+            0: Data(rule_id=1, dist=0.0),
+            1: Data(rule_id=1, dist=0.0),
+            2: Data(rule_id=1, dist=0.0),
         }
         correct_closest_examples_per_rule = {
             1: {0, 1, 2},
@@ -148,8 +150,7 @@ class TestFindNearestRule(TestCase):
         print(my_vars.closest_examples_per_rule)
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
         for example_id in my_vars.closest_rule_per_example:
-            rule_id, dist, features = my_vars.closest_rule_per_example[example_id]
-            self.assertTrue(features == correct_closest_rule_per_example[example_id].features)
+            rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
         self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
