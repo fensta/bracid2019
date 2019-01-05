@@ -94,19 +94,28 @@ class TestAddAllGoodRules(TestCase):
         improved, updated_rules = add_all_good_rules(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
                                                      lookup, min_max, classes)
         self.assertTrue(improved is True)
-        correct_covered = {2: {0, 1, 2, 3, 4, 5}}
+        # correct_covered = {2: {0, 1, 2, 3, 4, 5}}
+        correct_covered = {6: {0, 1, 2, 4, 5}, 7: {3}}
         correct_confusion_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {0, 1}, my_vars.TN: set(), my_vars.FN: set()}
+        # correct_closest_rule_per_example = {
+        #     0: Data(rule_id=2, dist=0.0),
+        #     1: Data(rule_id=2, dist=0.0),
+        #     2: Data(rule_id=2, dist=0.0),
+        #     3: Data(rule_id=2, dist=0.0),
+        #     4: Data(rule_id=2, dist=0.0),
+        #     5: Data(rule_id=2, dist=0.0)}
         correct_closest_rule_per_example = {
-            0: Data(rule_id=2, dist=0.0),
-            1: Data(rule_id=2, dist=0.0),
-            2: Data(rule_id=2, dist=0.0),
-            3: Data(rule_id=2, dist=0.0),
-            4: Data(rule_id=2, dist=0.0),
-            5: Data(rule_id=2, dist=0.0)}
+            0: Data(rule_id=6, dist=0.0),
+            1: Data(rule_id=6, dist=0.0),
+            2: Data(rule_id=6, dist=0.0),
+            3: Data(rule_id=7, dist=0.0),
+            4: Data(rule_id=6, dist=0.0),
+            5: Data(rule_id=6, dist=0.0)}
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                             abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
+        # latest_rule_id must be 7 as 2 new rules were added to the 5 initial rules
         self.assertTrue(len(updated_rules) == correct_rules and my_vars.latest_rule_id == (correct_rules - 1))
         self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
