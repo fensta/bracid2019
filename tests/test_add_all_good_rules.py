@@ -118,4 +118,6 @@ class TestAddAllGoodRules(TestCase):
         self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
         # latest_rule_id must be 7 as 2 new rules were added to the 5 initial rules
         self.assertTrue(len(updated_rules) == correct_rules and my_vars.latest_rule_id == (correct_rules - 1))
+        print(correct_covered)
+        print(my_vars.examples_covered_by_rule)
         self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
