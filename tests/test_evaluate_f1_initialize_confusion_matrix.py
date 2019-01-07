@@ -73,9 +73,10 @@ class TestEvaluateF1InitializeConfusionMatrix(TestCase):
             3: (1, 0.038125),
             4: (0, 0.015625),
             5: (2, 0.67015625)}
+        correct_closest_examples_per_rule = {1: {0, 3}, 0: {1, 4}, 5: {2}, 2: {5}}
         correct_conf_matrix = {'tp': {0, 1}, 'fp': {3, 4}, 'tn': {2, 5}, 'fn': set()}
-        print(f1, correct_f1)
         self.assertTrue(f1 == correct_f1)
+        self.assertTrue(correct_closest_examples_per_rule == my_vars.closest_examples_per_rule)
         for example_id in my_vars.closest_rule_per_example:
             rule_id, dist = my_vars.closest_rule_per_example[example_id]
             self.assertTrue(rule_id == correct_closest_rule_per_example[example_id][0] and
