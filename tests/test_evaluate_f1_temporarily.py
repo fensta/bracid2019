@@ -81,7 +81,7 @@ class TestEvaluateF1Temporarily(TestCase):
                               "Class": "banana"}, name=0)
         correct_f1 = 0.8
 
-        f1, conf_matrix, closest_rules, closest_examples, covered, updated_example_ids, is_updated = \
+        f1, conf_matrix, closest_rules, closest_examples, covered, updated_example_ids = \
             evaluate_f1_temporarily(df, new_rule, new_rule.name, class_col_name, lookup, min_max, classes)
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -92,7 +92,6 @@ class TestEvaluateF1Temporarily(TestCase):
             5: Data(rule_id=2, dist=0.67015625)}
         correct_covered = {0: {4}}
         correct_updated_examples = [4]
-        self.assertTrue(is_updated is True)
         self.assertTrue(updated_example_ids == correct_updated_examples)
         self.assertTrue(f1 == correct_f1)
         # Local result is still the same as in test_evaluate_f1_update_confusion_matrix.py
