@@ -91,24 +91,31 @@ class TestBracid(TestCase):
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
         my_vars.minority_class = "banana"
-        rules = [
-            pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0),
-            pd.Series({"A": "low", "B": (1, 1), "C": (2, 2), "Class": "apple"}, name=1),
-            pd.Series({"A": "high", "B": (4, 4), "C": (1, 1), "Class": "banana"}, name=2),
-            pd.Series({"A": "low", "B": (1.5, 1.5), "C": (0.5, 0.5), "Class": "banana"}, name=3),
-            pd.Series({"A": "low", "B": (0.5, 0.5), "C": (3, 3), "Class": "banana"}, name=4),
-            pd.Series({"A": "high", "B": (0.75, 0.75), "C": (2, 2), "Class": "banana"}, name=5)
-        ]
-        initial_correct_closest_rule_per_example = {
-            0: (1, 0.010000000000000002),
-            1: (0, 0.010000000000000002),
-            2: (5, 0.67015625),
-            3: (1, 0.038125),
-            4: (0, 0.015625),
-            5: (2, 0.67015625)}
-        minority_label = "apple"
+        minority_label = "banana"
         k = 3
+        correct_rules = [
+            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=4.0), "C": Bounds(lower=1.0, upper=2.0),
+                       "Class": "banana"}, name=2),
+            pd.Series({"A": "low", "B": (0.5, 1.5), "C": (0.5, 3.0), "Class": "banana"}, name=3),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                       "Class": "banana"}, name=4),
+            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=4.0), "C": Bounds(lower=1.0, upper=2.0),
+                       "Class": "banana"}, name=5),
+            pd.Series({"A": "low", "B": Bounds(lower=0.875, upper=2.5), "C": Bounds(lower=1.5, upper=3.0),
+                       "Class": "apple"}, name=0),
+            pd.Series({"A": "low", "B": Bounds(lower=0.875, upper=2.5), "C": Bounds(lower=1.5, upper=2.0),
+                       "Class": "apple"}, name=1),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                       "Class": "apple"}, name= 6),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                       "Class": "apple"}, name=7),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                       "Class": "apple"}, name=9),
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                       "Class": "apple"}, name=10)
+        ]
+        # Duplicates: 6+7+9+10, 2+5, 3+4
         rules = bracid(df, k, class_col_name, lookup, min_max, classes, minority_label)
         print("generalized rules")
         print(rules)
-        self.fail()
+        self.assertTrue(correct_rules == rules)
