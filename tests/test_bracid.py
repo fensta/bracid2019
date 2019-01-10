@@ -62,7 +62,6 @@ class TestBracid(TestCase):
 
     def test_bracid_stops(self):
         """Tests that the method stops"""
-        """Tests that rule set is updated when a generalized rule improves F1"""
         df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
                            "C": [3, 2, 1, .5, 3, 2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"]})
