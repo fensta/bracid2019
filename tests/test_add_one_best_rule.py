@@ -405,3 +405,5 @@ class TestAddOneBestRule(TestCase):
                                     abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
             self.assertTrue(updated_rules[5].equals(correct_generalized_rule))
             self.assertTrue(my_vars.conf_matrix == correct_confusion_matrix)
+            # Duplicate rule was deleted so that the last rule now corresponds to the rule with id
+            self.assertTrue(len(rules) - 1 == len(updated_rules) and updated_rules[-1].name == 6)
