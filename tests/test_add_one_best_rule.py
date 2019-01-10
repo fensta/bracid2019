@@ -358,7 +358,7 @@ class TestAddOneBestRule(TestCase):
             correct_generalized_rule_hash = compute_hashable_key(correct_generalized_rule)
 
             my_vars.examples_covered_by_rule = {}
-            my_vars.all_rules = {0: rules[test_idx], 1: rules[1], 2: rules[2], 3: rules[3], 4: rules[4], 5: rules[0],
+            my_vars.all_rules = {0: rules[test_idx], 1: rules[0], 2: rules[1], 3: rules[2], 4: rules[3], 5: rules[4],
                                  6: rules[5]}
             my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
             my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
@@ -370,18 +370,15 @@ class TestAddOneBestRule(TestCase):
             print(correct_generalized_rule_hash)
             my_vars.closest_rule_per_example = {
                 0: Data(rule_id=1, dist=0.010000000000000002),
-                1: Data(rule_id=0, dist=0.010000000000000002),
+                1: Data(rule_id=6, dist=0.0),
                 2: Data(rule_id=5, dist=0.67015625),
                 3: Data(rule_id=1, dist=0.038125),
                 4: Data(rule_id=0, dist=0.015625),
                 5: Data(rule_id=2, dist=0.67015625),
-                8: Data(rule_id=6, dist=12.543)  # Fake entry
+                8: Data(rule_id=6, dist=0)  # Fake entry
             }
-            # Actually, correctly it should've been
-            # my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
-            # at the start (i.e. F1=0.66666), but to see if it changes, it's changed
-            my_vars.conf_matrix = {my_vars.TP: {0}, my_vars.FP: set(), my_vars.TN: {1, 2, 5}, my_vars.FN: {3, 4}}
-            initial_f1 = 0.1
+            my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3, 4}, my_vars.TN: {2, 5}, my_vars.FN: set()}
+            initial_f1 = 0.66666
             k = 3
             neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max,
                                                         classes, label_type=my_vars.SAME_LABEL_AS_RULE,
@@ -393,16 +390,16 @@ class TestAddOneBestRule(TestCase):
                 1: Data(rule_id=6, dist=0.0),
                 2: Data(rule_id=5, dist=0.67015625),
                 3: Data(rule_id=1, dist=0.038125),
-                4: Data(rule_id=6, dist=0.015625),
-                5: Data(rule_id=2, dist=0.67015625)}
+                4: Data(rule_id=0, dist=0.015625),
+                5: Data(rule_id=2, dist=0.67015625),
+                8: Data(rule_id=6, dist=0)}
             self.assertTrue(improved is True)
-            correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
-            print(my_vars.closest_rule_per_example)
-            print(correct_closest_rule_per_example)
+            correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3, 4}, my_vars.TN: {2, 5}, my_vars.FN: set()}
+
             # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
             for example_id in my_vars.closest_rule_per_example:
                 # 8 was only added to test something else, since it won't be in the result
-                if example_id != 8:
+                # if example_id != 8:
                     rule_id, dist = my_vars.closest_rule_per_example[example_id]
                     self.assertTrue(rule_id == correct_closest_rule_per_example[example_id].rule_id and
                                     abs(dist - correct_closest_rule_per_example[example_id].dist) < 0.001)
