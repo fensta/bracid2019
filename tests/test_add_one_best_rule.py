@@ -74,6 +74,9 @@ class TestAddOneBestRule(TestCase):
         my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         # Note: examples_covered_by_rule implicitly includes the seeds of all rules
         my_vars.unique_rules = {}
+        for rule in rules:
+            rule_hash = compute_hashable_key(rule)
+            my_vars.unique_rules.setdefault(rule_hash, set()).add(rule.name)
 
         # Actually, correctly it should've been
         # my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
@@ -177,6 +180,10 @@ class TestAddOneBestRule(TestCase):
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 8}
         my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
         my_vars.unique_rules = {}
+        my_vars.unique_rules = {}
+        for rule in rules:
+            rule_hash = compute_hashable_key(rule)
+            my_vars.unique_rules.setdefault(rule_hash, set()).add(rule.name)
 
         # Actually, correctly it should've been
         # my_vars.conf_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
@@ -275,6 +282,11 @@ class TestAddOneBestRule(TestCase):
         # F1 is actually 0.6666, but setting it to 0.8 makes it not update any rule
         initial_f1 = 0.8
         k = 3
+        my_vars.unique_rules = {}
+        for rule in rules:
+            rule_hash = compute_hashable_key(rule)
+            my_vars.unique_rules.setdefault(rule_hash, set()).add(rule.name)
+
         neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
@@ -390,7 +402,7 @@ class TestAddOneBestRule(TestCase):
                 1: Data(rule_id=6, dist=0.0),
                 2: Data(rule_id=5, dist=0.67015625),
                 3: Data(rule_id=1, dist=0.038125),
-                4: Data(rule_id=0, dist=0.015625),
+                4: Data(rule_id=6, dist=0.015625),
                 5: Data(rule_id=2, dist=0.67015625),
                 8: Data(rule_id=6, dist=0)}
             self.assertTrue(improved is True)
