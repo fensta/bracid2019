@@ -59,12 +59,12 @@ class TestDeleteRuleStatistics(TestCase):
         my_vars.closest_rule_per_example = {0: Data(rule_id=0, dist=3), 3: Data(rule_id=0, dist=2),
                                             4: Data(rule_id=1, dist=0.13), 5: Data(rule_id=76, dist=3)}
         my_vars.examples_covered_by_rule = {0: {43, 12}, 1: {7}, 2: {3}}
-
+        final_rules = {}
         # Delete entries for rules with IDs 0 and 1 from all statistics
         rule1 = rules.pop()
-        delete_rule_statistics(df, rule1, rules, class_col_name, lookup, min_max, classes)
+        delete_rule_statistics(df, rule1, rules, final_rules, class_col_name, lookup, min_max, classes)
         rule2 = rules.pop()
-        delete_rule_statistics(df, rule2, rules, class_col_name, lookup, min_max, classes)
+        delete_rule_statistics(df, rule2, rules, final_rules,class_col_name, lookup, min_max, classes)
 
         correct_seed_example_rule = {4: {7}}
         correct_seed_rule_example = {5: 0, 7: 4}
@@ -133,12 +133,12 @@ class TestDeleteRuleStatistics(TestCase):
         my_vars.closest_rule_per_example = {0: Data(rule_id=0, dist=3), 3: Data(rule_id=0, dist=2),
                                             4: Data(rule_id=1, dist=0.13), 5: Data(rule_id=76, dist=3)}
         my_vars.examples_covered_by_rule = {0: {43, 12}, 1: {7}, 2: {3}}
-
+        final_rules = {}
         # Delete entries for rules with IDs 0 and 1 from all statistics
         rule1 = rules.pop()
-        delete_rule_statistics(df, rule1, rules, class_col_name, lookup, min_max, classes)
+        delete_rule_statistics(df, rule1, rules, final_rules, class_col_name, lookup, min_max, classes)
         rule2 = rules.pop()
-        delete_rule_statistics(df, rule2, rules, class_col_name, lookup, min_max, classes)
+        delete_rule_statistics(df, rule2, rules, final_rules, class_col_name, lookup, min_max, classes)
 
         correct_seed_example_rule = {4: {7}}
         correct_seed_rule_example = {5: 0, 7: 4}
