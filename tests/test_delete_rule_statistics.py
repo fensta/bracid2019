@@ -120,7 +120,8 @@ class TestDeleteRuleStatistics(TestCase):
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 0.1, "max": 1}, "C": {"min": 1, "max": 3}})
         my_vars.minority_class = "apple"
-
+        my_vars.unique_rules = {}
+        my_vars.all_rules = {}
         for rule in rules:
             hash_val = compute_hashable_key(rule)
             my_vars.unique_rules.setdefault(hash_val, set()).add(rule.name)
