@@ -87,8 +87,8 @@ class TestAddOneBestRule(TestCase):
         neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
-        improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
-                                                    lookup, min_max, classes)
+        improved, updated_rules, f1 = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1,
+                                                        class_col_name, lookup, min_max, classes)
 
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -103,7 +103,9 @@ class TestAddOneBestRule(TestCase):
             2: {5},
             5: {2}
         }
+        correct_f1 = 2 * 0.5 * 1 / 1.5
         self.assertTrue(improved is True)
+        self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
         correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=0)
         correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
@@ -194,8 +196,8 @@ class TestAddOneBestRule(TestCase):
         neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
-        improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
-                                                    lookup, min_max, classes)
+        improved, updated_rules, f1 = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1,
+                                                        class_col_name, lookup, min_max, classes)
 
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
@@ -210,6 +212,8 @@ class TestAddOneBestRule(TestCase):
             2: {5},
             5: {2}
         }
+        correct_f1 = 2 * 0.5 * 1 / 1.5
+        self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
         self.assertTrue(improved is True)
         correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (2.0, 3), "Class": "apple"}, name=0)
         correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
@@ -290,8 +294,8 @@ class TestAddOneBestRule(TestCase):
         neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max, classes,
                                                     label_type=my_vars.SAME_LABEL_AS_RULE, only_uncovered_neighbors=
                                                     True)
-        improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
-                                                    lookup, min_max, classes)
+        improved, updated_rules, f1 = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1,
+                                                        class_col_name, lookup, min_max, classes)
         correct_closest_rule_per_example = {
             0: Data(rule_id=1, dist=0.010000000000000002),
             1: Data(rule_id=0, dist=0.010000000000000002),
@@ -300,6 +304,8 @@ class TestAddOneBestRule(TestCase):
             4: Data(rule_id=0, dist=0.015625),
             5: Data(rule_id=2, dist=0.67015625)}
         self.assertTrue(improved is False)
+        correct_f1 = initial_f1
+        self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
         correct_generalized_rule = pd.Series({"A": "low", "B": (1, 1), "C": (3, 3), "Class": "apple"}, name=0)
         correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: set(), my_vars.TN: {2, 5}, my_vars.FN: {3, 4}}
         # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too
@@ -395,8 +401,8 @@ class TestAddOneBestRule(TestCase):
             neighbors, dists, _ = find_nearest_examples(df, k, rules[test_idx], class_col_name, lookup, min_max,
                                                         classes, label_type=my_vars.SAME_LABEL_AS_RULE,
                                                         only_uncovered_neighbors=True)
-            improved, updated_rules = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1,
-                                                        class_col_name, lookup, min_max, classes)
+            improved, updated_rules, f1 = add_one_best_rule(df, neighbors, rules[test_idx], rules, initial_f1,
+                                                            class_col_name, lookup, min_max, classes)
             correct_closest_rule_per_example = {
                 0: Data(rule_id=1, dist=0.010000000000000002),
                 1: Data(rule_id=6, dist=0.0),
@@ -406,6 +412,8 @@ class TestAddOneBestRule(TestCase):
                 5: Data(rule_id=2, dist=0.67015625),
                 8: Data(rule_id=6, dist=0)}
             self.assertTrue(improved is True)
+            correct_f1 = 2 * 0.5 * 1 / 1.5
+            self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
             correct_confusion_matrix = {my_vars.TP: {0, 1}, my_vars.FP: {3, 4}, my_vars.TN: {2, 5}, my_vars.FN: set()}
 
             # Make sure confusion matrix, closest rule per example, and rule set were updated with the updated rule too

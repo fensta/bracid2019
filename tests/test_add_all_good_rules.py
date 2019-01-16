@@ -163,7 +163,6 @@ class TestAddAllGoodRules(TestCase):
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
         my_vars.minority_class = "banana"
-        minority_label = "banana"
         initial_f1 = 2 * 0.5 * 1 / 1.5
         # All initial values are taken from the console to reproduce the errors
         rules = [
