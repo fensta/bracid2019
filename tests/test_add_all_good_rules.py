@@ -1,5 +1,5 @@
 from unittest import TestCase
-from collections import Counter
+from collections import Counter, deque
 
 import pandas as pd
 
@@ -156,7 +156,7 @@ class TestAddAllGoodRules(TestCase):
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
         my_vars.minority_class = "banana"
-        initial_f1 = 2 * 0.5 * 1 / 1.5
+        initial_f1 = 0.8571428571428571
         # All initial values are taken from the console to reproduce the errors
         rules = [
             pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3.0, upper=3.0),
@@ -171,8 +171,13 @@ class TestAddAllGoodRules(TestCase):
             pd.Series({"A": "low", "B": Bounds(lower=1.5, upper=1.5), "C": Bounds(lower=0.5, upper=0.5),
                        "Class": "banana"}, name=3)
         ]
-        my_vars.unique_rules = {-95301520747126041: {3}, -2598567829663672605: {4}, -4474918323734312904: {5},
-                                6807229905645022920: {0}, -937036079478185267: {1}, -2713471068084524055: {2}}
+        rules = deque(rules)
+        my_vars.unique_rules = {}
+        for rule in rules:
+            rule_hash = compute_hashable_key(rule)
+            my_vars.unique_rules.setdefault(rule_hash, set()).add(rule.name)
+        print(my_vars.unique_rules)
+
         my_vars.all_rules = {0: rules[2], 1: rules[3], 2: rules[4], 3: rules[test_idx], 4: rules[0], 5: rules[1]}
         neighbors = df.loc[[1, 0, 4]]
         my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
@@ -190,9 +195,47 @@ class TestAddAllGoodRules(TestCase):
         my_vars.examples_covered_by_rule = {0: {1}, 2: {3}}
         my_vars.latest_rule_id = 5
 
-        improved, updated_rules, f1 = add_all_good_rules(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
-                                                     lookup, min_max, classes)
+        # Process rule 3 which becomes rule 6 and it'll cover examples 0 and 4
+        improved, updated_rules, f1 = add_all_good_rules(df, neighbors, rules[test_idx], rules, initial_f1,
+                                                         class_col_name, lookup, min_max, classes)
+        correct_f1 = 0.888888888888889
+        rule_6 = pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                            "Class": "banana"}, name=6)
+        correct_conf_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {0}, my_vars.TN: {1}, my_vars.FN: set()}
+        correct_closest_rule = {1: Data(rule_id=0, dist=0.0), 4: Data(rule_id=6, dist=0.0),
+                                3: Data(rule_id=2, dist=0.0), 5: Data(rule_id=2, dist=0.04515625),
+                                2: Data(rule_id=5, dist=0.67015625), 0: Data(rule_id=6, dist=0.0)}
+        correct_closest_examples = {0: {1}, 2: {3, 5}, 5: {2}, 6: {0, 4}}
+        correct_covered_examples = {0: {1}, 2: {3}, 3: {1, 3}, 6: {0, 4}}
+        correct_rule_6_hash = compute_hashable_key(rule_6)
+        self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
+        self.assertTrue(improved is True)
+        self.assertTrue(updated_rules[-1].equals(rule_6))
+        self.assertTrue(my_vars.conf_matrix == correct_conf_matrix)
+        self.assertTrue(my_vars.closest_rule_per_example == correct_closest_rule)
+        self.assertTrue(my_vars.closest_examples_per_rule == correct_closest_examples)
+        self.assertTrue(my_vars.examples_covered_by_rule == correct_covered_examples)
+        self.assertTrue(len(my_vars.unique_rules) == 7 and correct_rule_6_hash in my_vars.unique_rules)
+
+        # Process rule 4 whose generalization becomes a duplicate of rule 6, so delete it
+        # Rule 7 is generalized from rule 4, so it's added as well
+        rule_4 = updated_rules.popleft()
+        updated_rules.append(rule_4)
+        neighbors = df.loc[[0, 1, 3]]
+        improved, updated_rules, f1 = add_all_good_rules(df, neighbors, rule_4, updated_rules, f1,
+                                                         class_col_name, lookup, min_max, classes)
+        print(updated_rules)
+        self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
+        self.assertTrue(improved is True)
+        self.assertTrue(rule_4.name not in my_vars.all_rules)
+        self.assertTrue(my_vars.conf_matrix == correct_conf_matrix)
+        self.assertTrue(my_vars.closest_rule_per_example == correct_closest_rule)
+        self.assertTrue(my_vars.closest_examples_per_rule == correct_closest_examples)
+        self.assertTrue(my_vars.examples_covered_by_rule == correct_covered_examples)
+        self.assertTrue(len(my_vars.unique_rules) == 7 and rule_4.name not in my_vars.all_rules)
         print("improved?", improved)
         print("updated rules")
         print("f1", f1)
-        print(updated_rules)
+
+        # Process rule 5
+
