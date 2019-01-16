@@ -131,7 +131,7 @@ class TestAddAllGoodRules(TestCase):
         self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
 
     def test_add_all_good_rules_bug(self):
-        """Tests a case that fails in bracid()"""
+        """Tests a case that fails in test_bracid_stops()"""
         df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
                            "C": [3, 2, 1, .5, 3, 2],
                            "Class": ["apple", "apple", "banana", "banana", "banana", "banana"],
@@ -158,36 +158,48 @@ class TestAddAllGoodRules(TestCase):
                             }
                     }
             }
+        test_idx = 5
         classes = ["apple", "banana"]
         min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
         # Use majority class as minority to have multiple neighbors and see if the function works correctly
         my_vars.minority_class = "banana"
         minority_label = "banana"
-        k = 3
-        print("dataset")
-        print(df)
-        f1 = 0.6666666666666666
-        # The values are taken from the console to reproduce the errors
+        initial_f1 = 2 * 0.5 * 1 / 1.5
+        # All initial values are taken from the console to reproduce the errors
+        rules = [
+            pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3.0, upper=3.0),
+                       "Class": "banana"}, name=4),
+            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2.0, upper=2.0),
+                       "Class": "banana"}, name=5),
+            pd.Series({"A": "low", "B": Bounds(lower=1.0, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                       "Class": "apple"}, name=0),
+            pd.Series({"A": "low", "B": Bounds(lower=1.0, upper=1.5), "C": Bounds(lower=0.5, upper=2.0),
+                       "Class": "apple"}, name=1),
+            pd.Series({"B": Bounds(lower=1.5, upper=4.0), "C": Bounds(0.5, upper=1.0), "Class": "banana"}, name=2),
+            pd.Series({"A": "low", "B": Bounds(lower=1.5, upper=1.5), "C": Bounds(lower=0.5, upper=0.5),
+                       "Class": "banana"}, name=3)
+        ]
         my_vars.unique_rules = {-95301520747126041: {3}, -2598567829663672605: {4}, -4474918323734312904: {5},
                                 6807229905645022920: {0}, -937036079478185267: {1}, -2713471068084524055: {2}}
-        my_vars.all_rules = {
-            0: pd.Series({"A": "low", "B": Bounds(lower=1.0, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
-                          "Class": "apple"}, name=0),
-            1: pd.Series({"A": "low", "B": Bounds(lower=1.0, upper=1.5), "C": Bounds(lower=0.5, upper=2.0),
-                          "Class": "apple"}, name=1),
-            2: pd.Series({"B": Bounds(lower=1.5, upper=4.0), "C": Bounds(0.5, upper=1.0), "Class": "banana"}, name=2),
-            3: pd.Series({"A": "low", "B": Bounds(lower=1.5, upper=1.5), "C": Bounds(lower=0.5, upper=0.5),
-                          "Class": "banana"}, name=3),
-            4: pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3.0, upper=3.0),
-                          "Class": "banana"}, name=4),
-            5: pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2.0, upper=2.0),
-                          "Class": "banana"}, name=5)
-        }
+        my_vars.all_rules = {0: rules[2], 1: rules[3], 2: rules[4], 3: rules[test_idx], 4: rules[0], 5: rules[1]}
         neighbors = df.loc[[1, 0, 4]]
-        print("neighbors")
-        print(neighbors)
-        rules = [
-            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=4.0), "C": Bounds(lower=1.0, upper=2.0),
-                       "Class": "banana"}, name=2),
+        my_vars.seed_rule_example = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+        my_vars.seed_example_rule = {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}, 5: {5}}
+        my_vars.closest_rule_per_example = {
+            1: Data(rule_id=0, dist=0.0),
+            4: Data(rule_id=0, dist=0.015625),
+            3: Data(rule_id=2, dist=0.0),
+            5: Data(rule_id=2, dist=0.04515625),
+            2: Data(rule_id=5, dist=0.67015625),
+            0: Data(rule_id=1, dist=0.010000000000000002)
+        }
+        my_vars.closest_examples_per_rule = {0: {1, 4}, 1: {0}, 2: {3, 5}, 5: {2}}
+        my_vars.conf_matrix = {my_vars.TP: {2, 3, 5}, my_vars.FP: set(), my_vars.TN: {0, 1}, my_vars.FN: {4}}
+        my_vars.examples_covered_by_rule = {0: {1}, 2: {3}}
+        my_vars.latest_rule_id = 5
 
-        ]
+        improved, updated_rules = add_all_good_rules(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
+                                                     lookup, min_max, classes)
+        print("improved?", improved)
+        print("updated rules")
+        print(updated_rules)
