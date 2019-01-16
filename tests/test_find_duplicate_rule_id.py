@@ -1,5 +1,4 @@
 from unittest import TestCase
-from collections import Counter
 
 import pandas as pd
 
