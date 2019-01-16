@@ -98,8 +98,7 @@ class TestAddAllGoodRules(TestCase):
         print(dists)
         improved, updated_rules = add_all_good_rules(df, neighbors, rules[test_idx], rules, initial_f1, class_col_name,
                                                      lookup, min_max, classes)
-        # TODO: uncomment condition
-        # self.assertTrue(improved is True)
+        self.assertTrue(improved is True)
         # correct_covered = {2: {0, 1, 2, 3, 4, 5}}
         correct_covered = {6: {0, 1, 2, 4, 5}, 7: {3}}
         correct_confusion_matrix = {my_vars.TP: {2, 3, 4, 5}, my_vars.FP: {0, 1}, my_vars.TN: set(), my_vars.FN: set()}
@@ -130,3 +129,65 @@ class TestAddAllGoodRules(TestCase):
         print(correct_covered)
         print(my_vars.examples_covered_by_rule)
         self.assertTrue(correct_covered == my_vars.examples_covered_by_rule)
+
+    def test_add_all_good_rules_bug(self):
+        """Tests a case that fails in bracid()"""
+        df = pd.DataFrame({"A": ["low", "low", "high", "low", "low", "high"], "B": [1, 1, 4, 1.5, 0.5, 0.75],
+                           "C": [3, 2, 1, .5, 3, 2],
+                           "Class": ["apple", "apple", "banana", "banana", "banana", "banana"],
+                           "tag": [my_vars.BORDERLINE, my_vars.BORDERLINE, my_vars.SAFE, my_vars.BORDERLINE,
+                                   my_vars.BORDERLINE, my_vars.BORDERLINE]})
+        class_col_name = "Class"
+        lookup = \
+            {
+                "A":
+                    {
+                        'high': 2,
+                        'low': 4,
+                        my_vars.CONDITIONAL:
+                            {
+                                'high':
+                                    Counter({
+                                        'banana': 2
+                                    }),
+                                'low':
+                                    Counter({
+                                        'banana': 2,
+                                        'apple': 2
+                                    })
+                            }
+                    }
+            }
+        classes = ["apple", "banana"]
+        min_max = pd.DataFrame({"B": {"min": 1, "max": 5}, "C": {"min": 1, "max": 11}})
+        # Use majority class as minority to have multiple neighbors and see if the function works correctly
+        my_vars.minority_class = "banana"
+        minority_label = "banana"
+        k = 3
+        print("dataset")
+        print(df)
+        f1 = 0.6666666666666666
+        # The values are taken from the console to reproduce the errors
+        my_vars.unique_rules = {-95301520747126041: {3}, -2598567829663672605: {4}, -4474918323734312904: {5},
+                                6807229905645022920: {0}, -937036079478185267: {1}, -2713471068084524055: {2}}
+        my_vars.all_rules = {
+            0: pd.Series({"A": "low", "B": Bounds(lower=1.0, upper=1.5), "C": Bounds(lower=0.5, upper=3.0),
+                          "Class": "apple"}, name=0),
+            1: pd.Series({"A": "low", "B": Bounds(lower=1.0, upper=1.5), "C": Bounds(lower=0.5, upper=2.0),
+                          "Class": "apple"}, name=1),
+            2: pd.Series({"B": Bounds(lower=1.5, upper=4.0), "C": Bounds(0.5, upper=1.0), "Class": "banana"}, name=2),
+            3: pd.Series({"A": "low", "B": Bounds(lower=1.5, upper=1.5), "C": Bounds(lower=0.5, upper=0.5),
+                          "Class": "banana"}, name=3),
+            4: pd.Series({"A": "low", "B": Bounds(lower=0.5, upper=0.5), "C": Bounds(lower=3.0, upper=3.0),
+                          "Class": "banana"}, name=4),
+            5: pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=0.75), "C": Bounds(lower=2.0, upper=2.0),
+                          "Class": "banana"}, name=5)
+        }
+        neighbors = df.loc[[1, 0, 4]]
+        print("neighbors")
+        print(neighbors)
+        rules = [
+            pd.Series({"A": "high", "B": Bounds(lower=0.75, upper=4.0), "C": Bounds(lower=1.0, upper=2.0),
+                       "Class": "banana"}, name=2),
+
+        ]
