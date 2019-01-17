@@ -232,10 +232,6 @@ class TestAddAllGoodRules(TestCase):
         self.assertTrue(my_vars.closest_rule_per_example == correct_closest_rule)
         self.assertTrue(my_vars.closest_examples_per_rule == correct_closest_examples)
         self.assertTrue(my_vars.examples_covered_by_rule == correct_covered_examples)
-        print(my_vars.unique_rules)
-        print(len(my_vars.all_rules))
-        print(my_vars.all_rules)
-        # TODO: hash of rule 4 must be deleted from unique_rules
         self.assertTrue(len(my_vars.unique_rules) == 7 and rule_4.name not in my_vars.all_rules)
         print("improved?", improved)
         print("updated rules")
