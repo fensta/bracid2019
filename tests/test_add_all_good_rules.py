@@ -195,7 +195,7 @@ class TestAddAllGoodRules(TestCase):
         my_vars.examples_covered_by_rule = {0: {1}, 2: {3}}
         my_vars.latest_rule_id = 5
 
-        # Process rule 3 which becomes rule 6 and it'll cover examples 0 and 4
+        # Process rule 3: first it is replaced, then its generalization becomes rule 6 and it'll cover examples 0 and 4
         improved, updated_rules, f1 = add_all_good_rules(df, neighbors, rules[test_idx], rules, initial_f1,
                                                          class_col_name, lookup, min_max, classes)
         correct_f1 = 0.888888888888889
@@ -206,7 +206,7 @@ class TestAddAllGoodRules(TestCase):
                                 3: Data(rule_id=2, dist=0.0), 5: Data(rule_id=2, dist=0.04515625),
                                 2: Data(rule_id=5, dist=0.67015625), 0: Data(rule_id=6, dist=0.0)}
         correct_closest_examples = {0: {1}, 2: {3, 5}, 5: {2}, 6: {0, 4}}
-        correct_covered_examples = {0: {1}, 2: {3}, 3: {1, 3}, 6: {0, 4}}
+        correct_covered_examples = {0: {1}, 2: {3}, 6: {0, 4}}
         correct_rule_6_hash = compute_hashable_key(rule_6)
         self.assertTrue(abs(correct_f1 - f1) < my_vars.PRECISION)
         self.assertTrue(improved is True)
@@ -232,6 +232,10 @@ class TestAddAllGoodRules(TestCase):
         self.assertTrue(my_vars.closest_rule_per_example == correct_closest_rule)
         self.assertTrue(my_vars.closest_examples_per_rule == correct_closest_examples)
         self.assertTrue(my_vars.examples_covered_by_rule == correct_covered_examples)
+        print(my_vars.unique_rules)
+        print(len(my_vars.all_rules))
+        print(my_vars.all_rules)
+        # TODO: hash of rule 4 must be deleted from unique_rules
         self.assertTrue(len(my_vars.unique_rules) == 7 and rule_4.name not in my_vars.all_rules)
         print("improved?", improved)
         print("updated rules")
