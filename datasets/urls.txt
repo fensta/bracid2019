@@ -1,0 +1,9 @@
+Cleveland
+---------
+- data: https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data
+- description: https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/heart-disease.names
+
+Iris
+----
+- data: https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
+- description: https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.names
