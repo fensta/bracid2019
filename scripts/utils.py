@@ -46,8 +46,9 @@ def read_dataset(src, positive_class, excluded=[], skip_rows=0, na_values=[], no
 
     Returns
     -------
-    pd.DataFrame, pd.DataFrame, dict, pd.DataFrame - dataset, initial rule set, counts matrix which contains for
-    nominal classes how often the value of a feature co-occurs with each class label, min/max values per numeric column
+    pd.DataFrame, dict, pd.DataFrame, pd.DataFrame - dataset, SVDM lookup matrix which contains for nominal
+    classes how often the value of a feature co-occurs with each class label, initial rule set, min/max values per
+    numeric column
 
     """
     my_vars.minority_class = positive_class
@@ -194,6 +195,7 @@ def add_tags(df, k, rules, class_col_name, counts, min_max, classes):
     """
     tags = []
     for rule in rules:
+        print(rule)
         rule_id = rule.name
         # Ignore current row
         examples_for_pairwise_distance = df.loc[df.index != rule_id]
@@ -2560,15 +2562,13 @@ if __name__ == "__main__":
     base_dir = os.path.abspath(os.path.join(os.path.dirname(
         os.path.abspath(__file__)), os.pardir))
     # Iris dataset
-    df = sklearn_to_df(sklearn.datasets.load_iris())
-    print(df)
-
+    # df = sklearn_to_df(sklearn.datasets.load_iris())
+    # print(df.head().to_string())
     src = os.path.join(base_dir, "datasets", "iris.csv")
     class_col_name = "Class"
     k = 3
-    classes = ["apple", "banana"]
-    dataset, lookup, rules, min_max = read_dataset(src)
-    df = add_tags(df, k, class_col_name, lookup, min_max, classes)
+    classes = ["Iris-setosa", "Iris-virginica", "Iris-versicolor"]
+    dataset, lookup, rules, min_max = read_dataset(src, positive_class=classes[0])
     print("own function")
     print(dataset)
     print(dataset.columns)
